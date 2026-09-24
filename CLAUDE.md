@@ -25,6 +25,16 @@ supersedes that spec.
 | `icons/icon-source.png` | Original app icon (1254 px). `app-192.png` / `app-512.png` are resized from it. |
 | `icons/exercises/<exercise-id>.png` | Per-exercise icons, supplied by the owner. Square, ~256 px, named by exercise id. A missing file falls back to a neutral grey square — never generate placeholder art. |
 
+## Deploy
+
+- Repo: https://github.com/Egiohh/swole-mole (public — free Pages requires it).
+- Live: **https://egiohh.github.io/swole-mole/** — GitHub Pages, built from
+  `main` at `/`. **Pushing to `main` is deploying.** The phone picks it up on
+  the next launch after that (see the service-worker note below).
+- `gh` CLI is installed at `C:\Program Files\GitHub CLI\gh.exe` (may not be on
+  the Bash tool's PATH), logged in as `Egiohh`. Commit identity is set in this
+  repo's local git config (noreply email), not globally.
+
 ## Decisions already made
 
 Reasoned through at length. Do not re-open them without asking — each removes
