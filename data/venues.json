@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "$comment": "What equipment exists where. Joined with each exercise's 'requires' to derive where it can be performed - see validate.py. Never store 'can be done at home' on an exercise; it is derived from these two facts, so buying equipment reclassifies everything by editing one line here.",
+  "venues": {
+    "gym": {
+      "label": "Gym",
+      "equipment": [
+        "bodyweight",
+        "dumbbell",
+        "bench",
+        "cable-column",
+        "machine",
+        "pull-up-bar"
+      ],
+      "notes": [
+        "Surveyed 2026-09-19. All equipment tags confirmed present.",
+        "Stack increments: 5 kg on the machines checked (leg curl, standing glute, seated calf). Cable columns and older machines not yet spot-checked.",
+        "Dumbbells start at 3 kg. Step size at the light end not yet recorded.",
+        "THREE cable setups: multi-station (pulley top or bottom), crossover (two side pulleys), and an adjustable column with the pulley on a vertical sled - any height. The adjustable column is the most useful single piece of equipment here given the constraints.",
+        "THREE leg presses with incomparable load scales - see equipment-survey.md. The 90-100 kg figure belongs to the horizontal seat-moving unit only.",
+        "The pec deck does NOT reverse. Rear delts are done on a cable.",
+        "Smith machine present but excluded: fixed bar path, rigid bilateral, barbell."
+      ]
+    },
+    "home": {
+      "label": "Home",
+      "equipment": [
+        "bodyweight",
+        "dumbbell"
+      ],
+      "notes": [
+        "Dumbbells: one modular handle, loadable ONLY to 1 / 3 / 5 / 7 / 9 kg, currently set at 7 kg. Plus a fixed pair of 3 kg.",
+        "The 3 kg pair is below the useful training range for lateral raises - pattern maintenance only.",
+        "No bench, no cable, no bar. Used as a fallback on a missed gym day, not as a regime."
+      ]
+    }
+  }
+}

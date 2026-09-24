@@ -1,0 +1,231 @@
+/* Dark by default (gyms are bright, phones are dim); light if the phone asks. */
+:root {
+  --bg: #121212;
+  --surface: #1e1e1e;
+  --surface-2: #2a2a2a;
+  --text: #f2f2f2;
+  --muted: #a0a0a0;
+  --accent: #fdbb1a;      /* the mole's background */
+  --on-accent: #1a1400;
+  --done: #3fae5a;
+  --warn-bg: #3a2a10;
+  --warn-text: #ffd27a;
+  --tap: 56px;            /* minimum touch target: thumb, not fingertip */
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f4f4f4;
+    --surface: #ffffff;
+    --surface-2: #e6e6e6;
+    --text: #151515;
+    --muted: #666666;
+    --done: #2b8a44;
+    --warn-bg: #fff1d6;
+    --warn-text: #6b4500;
+    color-scheme: light;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 17px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button, input, textarea { font: inherit; color: inherit; }
+
+.sub { color: var(--muted); font-size: 14px; }
+
+/* ---------- List ---------- */
+
+.top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  padding-top: max(12px, env(safe-area-inset-top));
+}
+.top img { width: 36px; height: 36px; border-radius: 8px; }
+.top h1 { font-size: 20px; margin: 0; flex: 1; }
+.top span { color: var(--muted); }
+
+#list {
+  list-style: none;
+  margin: 0;
+  padding: 0 12px 96px; /* room for the rest timer */
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 72px;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  background: var(--surface);
+  border-radius: 12px;
+  cursor: pointer;
+}
+.row .name { font-weight: 600; }
+.row.complete { opacity: 0.4; filter: grayscale(1); }
+
+.ico {
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+.ico img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.empty { padding: 24px 12px; color: var(--muted); }
+
+/* ---------- Detail (fullscreen over the list, so list scroll is kept) ---------- */
+
+#detail {
+  position: fixed;
+  inset: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--bg);
+  padding: 0 16px 112px;
+}
+
+.bar {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 -16px;
+  padding: 8px 16px 8px 4px;
+  padding-top: max(8px, env(safe-area-inset-top));
+  background: var(--bg);
+  z-index: 1;
+}
+.bar h2 { font-size: 20px; margin: 0; }
+.back {
+  width: var(--tap);
+  height: var(--tap);
+  flex: none;
+  border: 0;
+  background: none;
+  font-size: 40px;
+  line-height: 1;
+}
+
+.target { margin: 4px 0 0; font-weight: 600; color: var(--accent); }
+
+.lbl {
+  display: block;
+  margin: 20px 0 8px;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+.lbl span { text-transform: none; letter-spacing: 0; }
+
+.stepper { display: flex; gap: 8px; flex: 1; min-width: 0; }
+.stepper button {
+  width: var(--tap);
+  height: var(--tap);
+  flex: none;
+  border: 0;
+  border-radius: 12px;
+  background: var(--surface-2);
+  font-size: 28px;
+}
+.stepper input {
+  flex: 1;
+  min-width: 0;
+  height: var(--tap);
+  border: 0;
+  border-radius: 12px;
+  background: var(--surface);
+  text-align: center;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.sets { display: flex; flex-direction: column; gap: 8px; }
+.set { display: flex; align-items: center; gap: 8px; }
+.setno { width: 20px; flex: none; color: var(--muted); text-align: center; }
+.grow { flex: 1; }
+.tick {
+  width: 72px;
+  height: var(--tap);
+  flex: none;
+  border: 2px solid var(--surface-2);
+  border-radius: 12px;
+  background: none;
+  font-size: 26px;
+  color: var(--muted);
+}
+.set.done .tick { background: var(--done); border-color: var(--done); color: #fff; }
+.set.done input { color: var(--muted); }
+
+.addset {
+  margin-top: 8px;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px dashed var(--muted);
+  border-radius: 12px;
+  background: none;
+  color: var(--muted);
+}
+
+.chips { display: flex; gap: 8px; }
+.chip {
+  flex: 1;
+  height: 48px;
+  border: 0;
+  border-radius: 24px;
+  background: var(--surface-2);
+}
+.chip.on { background: var(--accent); color: var(--on-accent); font-weight: 700; }
+
+.cues, .rom, .cautions { margin: 20px 0 0; padding: 12px 12px 12px 32px; border-radius: 12px; }
+.cues { background: var(--surface); }
+.cues li { font-weight: 600; }
+.rom { background: var(--surface); color: var(--muted); }
+/* Some rom_notes / cautions are safety instructions: make them hard to miss. */
+.cautions { background: var(--warn-bg); color: var(--warn-text); }
+.cues li + li, .rom li + li, .cautions li + li { margin-top: 6px; }
+
+details { margin-top: 20px; }
+summary { min-height: 44px; line-height: 44px; color: var(--muted); }
+textarea {
+  width: 100%;
+  border: 0;
+  border-radius: 12px;
+  padding: 12px;
+  background: var(--surface);
+  resize: vertical;
+}
+
+/* ---------- Rest timer ---------- */
+
+#rest {
+  position: fixed;
+  left: 50%;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  padding: 12px 28px;
+  border-radius: 28px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 22px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  z-index: 2;
+}
+[hidden] { display: none !important; }

@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "id": "freeform-pool",
+  "title": "Freeform pool (as actually trained)",
+  "effective_from": "2025-06-01",
+  "rationale": "This documents what is actually being done, not a designed plan. There is no fixed per-session assignment: exercises are picked from the pool depending on the day and on what is free. effective_from is approximate - training began around June 2025 and this has been the de facto pattern throughout.",
+  "structure": "freeform",
+  "frequency_per_week": 3,
+  "session_duration_max_min": 120,
+  "effort": {
+    "policy": "Every set taken to or near failure. Self-reported as 3x15 at the limit, which is internally inconsistent - genuine failure on set 1 costs reps on set 3. Needs an honest count before it can be relied on.",
+    "target_rir": [
+      0,
+      0
+    ]
+  },
+  "default_rest_seconds": {
+    "compound": 180,
+    "isolation": 180
+  },
+  "progression": "Self-devised double progression: when all sets reach the top of the range in clean form, add the smallest available increment. Originally a fixed 15 reps, later relaxed to 10-15.",
+  "blocks": [
+    {
+      "name": "pool",
+      "items": [
+        {
+          "exercise": "horizontal-leg-press",
+          "sets": 3,
+          "rep_range": [
+            12,
+            15
+          ]
+        },
+        {
+          "exercise": "seated-leg-extension",
+          "sets": 3,
+          "rep_range": [
+            12,
+            15
+          ]
+        },
+        {
+          "exercise": "seated-machine-chest-press",
+          "sets": 3,
+          "rep_range": [
+            12,
+            15
+          ]
+        },
+        {
+          "exercise": "seated-pec-deck-fly",
+          "sets": 3,
+          "rep_range": [
+            12,
+            15
+          ]
+        },
+        {
+          "exercise": "seated-lat-pulldown-wide-bar",
+          "sets": 3,
+          "rep_range": [
+            12,
+            15
+          ]
+        },
+        {
+          "exercise": "seated-lat-pulldown-triangle-grip",
+          "sets": 3,
+          "rep_range": [
+            12,
+            15
+          ]
+        },
+        {
+          "exercise": "single-arm-chest-supported-row",
+          "sets": 3,
+          "rep_range": [
+            12,
+            15
+          ],
+          "per_side": true
+        },
+        {
+          "exercise": "seated-cable-row",
+          "sets": 3,
+          "rep_range": [
+            10,
+            12
+          ],
+          "note": "naturally trained at 10-12, not 15 - the only exercise in the pool where that is already true"
+        },
+        {
+          "exercise": "standing-cable-triceps-pushdown",
+          "sets": 3,
+          "rep_range": [
+            12,
+            15
+          ]
+        },
+        {
+          "exercise": "roman-chair-back-extension",
+          "sets": 3,
+          "rep_range": [
+            20,
+            25
+          ]
+        },
+        {
+          "exercise": "decline-bench-sit-up",
+          "sets": 3,
+          "rep_range": [
+            15,
+            15
+          ]
+        }
+      ]
+    }
+  ]
+}

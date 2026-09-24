@@ -1,0 +1,51 @@
+{
+  "horizontal-leg-press": {
+    "load": 95,
+    "date": "2026-09-18"
+  },
+  "seated-leg-extension": {
+    "load": 50,
+    "date": "2026-09-18"
+  },
+  "seated-machine-chest-press": {
+    "load": 55,
+    "date": "2026-09-18"
+  },
+  "seated-pec-deck-fly": {
+    "load": 30,
+    "date": "2026-09-18"
+  },
+  "seated-lat-pulldown-wide-bar": {
+    "load": 55,
+    "date": "2026-09-18"
+  },
+  "seated-lat-pulldown-triangle-grip": {
+    "load": 50,
+    "date": "2026-09-18"
+  },
+  "single-arm-chest-supported-row": {
+    "load": 30,
+    "date": "2026-09-18"
+  },
+  "standing-cable-triceps-pushdown": {
+    "load": 20,
+    "date": "2026-09-18"
+  },
+  "roman-chair-back-extension": {
+    "load": null,
+    "date": "2026-09-18"
+  },
+  "decline-bench-sit-up": {
+    "load": null,
+    "date": "2026-09-18"
+  },
+  "seated-cable-row": {
+    "load": 45,
+    "reps": [
+      10,
+      10,
+      10
+    ],
+    "date": "2026-09-18"
+  }
+}

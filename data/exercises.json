@@ -1,0 +1,1433 @@
+{
+  "schema_version": 1,
+  "exercises": [
+    {
+      "id": "standing-cable-triceps-pushdown",
+      "movement": "elbow-extension",
+      "aliases": [
+        "multi-station tricipiti",
+        "push-down ai cavi"
+      ],
+      "load_type": "stack-kg",
+      "description": "Standing pushdown at the free-standing cable column, high pulley, straight bar. Strictest pushdown variant: the upper arm never moves.",
+      "execution": [
+        "Set the pulley high and attach the straight bar.",
+        "Stand facing the column, feet shoulder-width, knees slightly flexed, back straight.",
+        "Grip the bar overhand and pin the elbows against the ribs.",
+        "Extend the elbows until the bar reaches the thighs.",
+        "Return under control until the elbows reach roughly 90 degrees."
+      ],
+      "cues": [
+        "Only the forearms move",
+        "Ribs down, back straight",
+        "Upper arm stays vertical"
+      ],
+      "common_errors": [
+        "Leaning the torso forward to add bodyweight to the movement",
+        "Elbows drifting forward or flaring out",
+        "Shrugging the shoulders at lockout"
+      ],
+      "rom_notes": [
+        "Upper arm stays vertical throughout; the shoulder contributes nothing."
+      ],
+      "muscles": [
+        {
+          "muscle": "triceps-brachii",
+          "role": "primary"
+        },
+        {
+          "muscle": "anconeus",
+          "role": "secondary"
+        },
+        {
+          "muscle": "forearm-flexors",
+          "role": "stabiliser"
+        }
+      ],
+      "cautions": [],
+      "constraint_flags": [],
+      "requires": [
+        "cable-column"
+      ]
+    },
+    {
+      "id": "seated-lat-pulldown-wide-bar",
+      "movement": "vertical-pull",
+      "aliases": [
+        "lat machine",
+        "lat machine (bar)"
+      ],
+      "load_type": "stack-kg",
+      "description": "Seated pulldown at the lat machine with the long wide bar, thighs locked under the pads, bar pulled to the chest.",
+      "execution": [
+        "Set the thigh pads so the legs are locked and the hips cannot rise.",
+        "Take the wide bar with an overhand grip wider than the shoulders.",
+        "Sit down with the torso close to upright and a slight backward lean.",
+        "Pull the bar down to the upper chest, driving the elbows down and back.",
+        "Return under control to full arm extension without letting the shoulders shrug up."
+      ],
+      "cues": [
+        "Elbows down toward the floor, not back",
+        "Chest up to meet the bar"
+      ],
+      "common_errors": [
+        "Leaning far back and turning it into a row",
+        "Pulling with the hands rather than driving the elbows",
+        "Letting the shoulders ride up at the top"
+      ],
+      "rom_notes": [
+        "Bar to the upper chest; never behind the neck."
+      ],
+      "muscles": [
+        {
+          "muscle": "latissimus-dorsi",
+          "role": "primary"
+        },
+        {
+          "muscle": "teres-major",
+          "role": "secondary"
+        },
+        {
+          "muscle": "biceps-brachii",
+          "role": "secondary"
+        },
+        {
+          "muscle": "rhomboids",
+          "role": "secondary"
+        },
+        {
+          "muscle": "trapezius-lower",
+          "role": "stabiliser"
+        }
+      ],
+      "cautions": [],
+      "constraint_flags": [],
+      "requires": [
+        "machine"
+      ]
+    },
+    {
+      "id": "seated-lat-pulldown-triangle-grip",
+      "movement": "vertical-pull",
+      "aliases": [
+        "lat machine (triangolo)"
+      ],
+      "load_type": "stack-kg",
+      "description": "Same lat machine, close neutral grip using the short triangle handle. Narrower grip shifts emphasis toward the lower lats and loads the biceps more.",
+      "execution": [
+        "Attach the triangle handle and set the thigh pads.",
+        "Take the handle with both palms facing each other.",
+        "Pull the handle down to the sternum, elbows tracking close to the ribs.",
+        "Return under control to full extension."
+      ],
+      "cues": [
+        "Handle to the sternum",
+        "Elbows brush past the ribs"
+      ],
+      "common_errors": [
+        "Shortening the range at the bottom",
+        "Excessive backward lean"
+      ],
+      "rom_notes": [],
+      "muscles": [
+        {
+          "muscle": "latissimus-dorsi",
+          "role": "primary"
+        },
+        {
+          "muscle": "biceps-brachii",
+          "role": "secondary"
+        },
+        {
+          "muscle": "brachialis",
+          "role": "secondary"
+        },
+        {
+          "muscle": "teres-major",
+          "role": "secondary"
+        },
+        {
+          "muscle": "rhomboids",
+          "role": "stabiliser"
+        }
+      ],
+      "cautions": [],
+      "constraint_flags": [],
+      "requires": [
+        "machine"
+      ]
+    },
+    {
+      "id": "seated-machine-chest-press",
+      "movement": "horizontal-push",
+      "aliases": [
+        "chest press"
+      ],
+      "load_type": "stack-kg",
+      "description": "Seated machine press with a tall back pad, handles at shoulder height, pushed horizontally away from the chest.",
+      "execution": [
+        "Set the seat so the handles sit at mid-chest height.",
+        "Sit with the whole back against the pad and the shoulders down.",
+        "Push the handles away from the chest until the arms are nearly straight.",
+        "Return under control until the elbows reach roughly 90 degrees."
+      ],
+      "cues": [
+        "Shoulders stay down and back against the pad",
+        "Do not lock out hard"
+      ],
+      "common_errors": [
+        "Shoulders rolling forward at the end of the push",
+        "Elbows travelling behind the torso on the return"
+      ],
+      "rom_notes": [
+        "Do not let the elbow pass 90 degrees on the return; the shoulder should never be forced into extension behind the trunk."
+      ],
+      "muscles": [
+        {
+          "muscle": "pectoralis-major",
+          "role": "primary"
+        },
+        {
+          "muscle": "anterior-deltoid",
+          "role": "secondary"
+        },
+        {
+          "muscle": "triceps-brachii",
+          "role": "secondary"
+        },
+        {
+          "muscle": "serratus-anterior",
+          "role": "stabiliser"
+        }
+      ],
+      "cautions": [],
+      "constraint_flags": [
+        "rigid-bilateral"
+      ],
+      "requires": [
+        "machine"
+      ]
+    },
+    {
+      "id": "seated-pec-deck-fly",
+      "movement": "chest-fly",
+      "aliases": [
+        "butterfly",
+        "pectoral",
+        "pectoral machine"
+      ],
+      "load_type": "stack-kg",
+      "description": "Seated fly machine with forearm pads. Force is applied through the forearm against the pad, not through the hand on the grip.",
+      "execution": [
+        "Set the seat so the pads meet the forearms at roughly shoulder height.",
+        "Sit back, place the forearms against the pads with the elbows bent, arms open wide.",
+        "Rest the hands on the grips without pushing through them.",
+        "Bring the arms together until the pads nearly touch in front of the chest.",
+        "Open under control back to the start."
+      ],
+      "cues": [
+        "Push through the forearm, not the hand",
+        "Arms up 'like being arrested' at the start"
+      ],
+      "common_errors": [
+        "Gripping and pressing with the hands, turning it into a press",
+        "Opening so far that the shoulder is stretched at end range"
+      ],
+      "rom_notes": [
+        "Elbow angle stays fixed throughout; this is a fly, not a press."
+      ],
+      "muscles": [
+        {
+          "muscle": "pectoralis-major",
+          "role": "primary"
+        },
+        {
+          "muscle": "anterior-deltoid",
+          "role": "secondary"
+        }
+      ],
+      "cautions": [
+        "Opening too wide at the start loads the front of the shoulder capsule."
+      ],
+      "constraint_flags": [
+        "rigid-bilateral"
+      ],
+      "requires": [
+        "machine"
+      ]
+    },
+    {
+      "id": "single-arm-chest-supported-row",
+      "movement": "horizontal-pull",
+      "aliases": [
+        "vertical row"
+      ],
+      "load_type": "stack-kg",
+      "description": "Chest-supported machine row performed one arm at a time. Straddle seat, chest pad, handles forward. The free hand holds a fixed grip on the frame to brace.",
+      "execution": [
+        "Set the seat so the chest pad meets the sternum and the handles are reachable at arm's length.",
+        "Straddle the seat, chest firmly against the pad.",
+        "Hold a fixed grip with the free hand, that arm staying horizontal and still.",
+        "Pull one handle back, driving the elbow low and past the ribs.",
+        "Return under control to full extension. Complete the weaker side first, then match its reps on the stronger side."
+      ],
+      "cues": [
+        "Elbow toward the jeans pocket, not out wide",
+        "Chest never leaves the pad"
+      ],
+      "common_errors": [
+        "Chest lifting off the pad to add body english",
+        "Rotating the torso toward the working side",
+        "Flaring the elbow high, which changes the exercise"
+      ],
+      "rom_notes": [
+        "Low elbow path biases the lats; a deliberately high, flared elbow is a different exercise and should be a separate id."
+      ],
+      "muscles": [
+        {
+          "muscle": "latissimus-dorsi",
+          "role": "primary"
+        },
+        {
+          "muscle": "biceps-brachii",
+          "role": "secondary"
+        },
+        {
+          "muscle": "rhomboids",
+          "role": "secondary"
+        },
+        {
+          "muscle": "trapezius-middle",
+          "role": "secondary"
+        },
+        {
+          "muscle": "obliques",
+          "role": "stabiliser"
+        }
+      ],
+      "cautions": [],
+      "constraint_flags": [],
+      "requires": [
+        "machine"
+      ]
+    },
+    {
+      "id": "horizontal-leg-press",
+      "movement": "leg-press",
+      "aliases": [
+        "pressa orizzontale"
+      ],
+      "load_type": "stack-kg",
+      "description": "Seated horizontal sled leg press, feet driving against a vertical platform.",
+      "execution": [
+        "Set the seat so the knees are bent to roughly 90 degrees at the start.",
+        "Place the feet shoulder-width on the platform, mid-foot under the load.",
+        "Push until the legs are nearly straight, without locking the knees hard.",
+        "Return under control to the start depth, keeping the lower back against the seat."
+      ],
+      "cues": [
+        "Knees track over the toes",
+        "Lower back stays flat against the seat"
+      ],
+      "common_errors": [
+        "Letting the pelvis tuck at the bottom, rounding the lower back",
+        "Locking the knees at the top"
+      ],
+      "rom_notes": [
+        "Stop the return before the pelvis lifts off the seat."
+      ],
+      "muscles": [
+        {
+          "muscle": "quadriceps",
+          "role": "primary"
+        },
+        {
+          "muscle": "gluteus-maximus",
+          "role": "secondary"
+        },
+        {
+          "muscle": "adductors",
+          "role": "secondary"
+        },
+        {
+          "muscle": "hamstrings",
+          "role": "stabiliser"
+        }
+      ],
+      "cautions": [
+        "Flat, fully pronated feet: check that the knees track over the feet through the whole range and do not fall inward near the bottom. See health.md, 'Feet'."
+      ],
+      "constraint_flags": [
+        "rigid-bilateral"
+      ],
+      "requires": [
+        "machine"
+      ]
+    },
+    {
+      "id": "seated-leg-extension",
+      "movement": "knee-extension",
+      "aliases": [
+        "leg extension"
+      ],
+      "load_type": "stack-kg",
+      "description": "Seated knee extension. Hips locked by a lap pad, roller across the front of the shins, legs pushed up against resistance pushing down.",
+      "execution": [
+        "Set the backrest so there are two fingers of space between the back of the knee and the seat edge.",
+        "Set the roller across the front of the lower shin, above the ankle.",
+        "Lock the lap pad so the hips cannot rise.",
+        "Extend the knees until the legs are straight.",
+        "Lower under control without letting the weight stack touch down."
+      ],
+      "cues": [
+        "Two fingers of gap at the knee",
+        "Pause briefly at the top"
+      ],
+      "common_errors": [
+        "Sliding forward in the seat so the knee axis no longer matches the machine's pivot",
+        "Using the hands on the grips to pull the torso and add momentum"
+      ],
+      "rom_notes": [
+        "Knee joint must align with the machine's rotation axis."
+      ],
+      "muscles": [
+        {
+          "muscle": "quadriceps",
+          "role": "primary"
+        }
+      ],
+      "cautions": [],
+      "constraint_flags": [
+        "rigid-bilateral"
+      ],
+      "requires": [
+        "machine"
+      ]
+    },
+    {
+      "id": "roman-chair-back-extension",
+      "movement": "hip-extension",
+      "aliases": [
+        "sedia romana",
+        "iperestensioni",
+        "estensione lombare"
+      ],
+      "load_type": "bodyweight",
+      "description": "Prone back extension on a vertical Roman chair. Thighs on the pad, heels hooked under the rear rollers, torso lowered to horizontal and raised back in line.",
+      "execution": [
+        "Set the pad just below the hip crease and hook the heels under the rollers.",
+        "Cross the arms over the chest.",
+        "Lower the torso until the body is horizontal.",
+        "Raise until the body is straight, without arching beyond a straight line."
+      ],
+      "cues": [
+        "Stop at straight, do not hyperextend",
+        "Arms crossed like a mummy",
+        "Do not stand up straight away - pause on the handles first"
+      ],
+      "common_errors": [
+        "Arching hard past neutral at the top",
+        "Bouncing out of the bottom"
+      ],
+      "rom_notes": [
+        "Top position is a straight line, not an arch.",
+        "Low blood pressure: after the set, hold the handles and come up in stages, pausing a couple of seconds before standing fully upright. Twenty-plus reps with the head below the heart followed by standing is a classic setup for a pressure drop."
+      ],
+      "muscles": [
+        {
+          "muscle": "erector-spinae",
+          "role": "primary"
+        },
+        {
+          "muscle": "gluteus-maximus",
+          "role": "secondary"
+        },
+        {
+          "muscle": "hamstrings",
+          "role": "secondary"
+        }
+      ],
+      "cautions": [
+        "See health.md, 'Circulation'. The end-of-set pause is a standing instruction, not an optional precaution."
+      ],
+      "constraint_flags": [],
+      "requires": [
+        "machine"
+      ]
+    },
+    {
+      "id": "decline-bench-sit-up",
+      "movement": "spinal-flexion",
+      "aliases": [
+        "addominali in panca",
+        "crunch su panca inclinata"
+      ],
+      "load_type": "bodyweight",
+      "description": "Full sit-up on a decline abdominal bench with the ankles hooked under rollers, performed through the complete range up to the rollers.",
+      "execution": [
+        "Set the bench one notch short of maximum incline.",
+        "Hook the ankles under the rollers and lie back.",
+        "Curl up through the full range until the face is near the rollers.",
+        "Lower under control to the start."
+      ],
+      "cues": [
+        "Lead with the ribs, not the neck",
+        "Pause sitting before standing off the bench"
+      ],
+      "common_errors": [
+        "Pulling on the head or neck",
+        "Dropping back down without control"
+      ],
+      "rom_notes": [
+        "Full range makes this substantially a hip flexor exercise, not a pure abdominal one.",
+        "Head-below-heart position. Same standing rule as the Roman chair: sit up, pause, then stand."
+      ],
+      "muscles": [
+        {
+          "muscle": "rectus-abdominis",
+          "role": "primary"
+        },
+        {
+          "muscle": "hip-flexors",
+          "role": "primary"
+        },
+        {
+          "muscle": "obliques",
+          "role": "secondary"
+        }
+      ],
+      "cautions": [
+        "High-volume loaded spinal flexion. Keep the volume moderate where spinal considerations apply.",
+        "Low blood pressure: see health.md, 'Circulation'."
+      ],
+      "constraint_flags": [
+        "loaded-spinal-flexion"
+      ],
+      "requires": [
+        "machine"
+      ]
+    },
+    {
+      "id": "dumbbell-lunge",
+      "movement": "lunge",
+      "aliases": [
+        "affondi"
+      ],
+      "load_type": "dumbbell-per-hand-kg",
+      "description": "Split-stance lunge holding a dumbbell in each hand at the sides. Each leg is loaded independently; the dumbbells hang rather than compressing the spine from above.",
+      "execution": [
+        "Stand upright with a dumbbell in each hand at the sides.",
+        "Step forward into a split stance and lower until the rear knee is near the floor.",
+        "Drive through the front heel to return to standing.",
+        "Alternate legs, or complete all reps on one leg before switching."
+      ],
+      "cues": [
+        "Torso upright",
+        "Front knee tracks over the foot",
+        "Weight through the whole foot; do not let the knee drift inward"
+      ],
+      "common_errors": [
+        "Leaning the torso over the front thigh",
+        "Steps too short, putting the knee far ahead of the foot"
+      ],
+      "rom_notes": [],
+      "muscles": [
+        {
+          "muscle": "quadriceps",
+          "role": "primary"
+        },
+        {
+          "muscle": "gluteus-maximus",
+          "role": "primary"
+        },
+        {
+          "muscle": "hamstrings",
+          "role": "secondary"
+        },
+        {
+          "muscle": "gluteus-medius",
+          "role": "stabiliser"
+        },
+        {
+          "muscle": "obliques",
+          "role": "stabiliser"
+        }
+      ],
+      "cautions": [
+        "Learn the pattern with bodyweight before adding dumbbells.",
+        "Flat, fully pronated feet: watch that the front knee tracks over the foot rather than collapsing inward as the arch flattens under load. See health.md, 'Feet'."
+      ],
+      "constraint_flags": [],
+      "requires": [
+        "dumbbell"
+      ]
+    },
+    {
+      "id": "single-arm-dumbbell-lateral-raise",
+      "movement": "lateral-raise",
+      "aliases": [
+        "alzate laterali"
+      ],
+      "load_type": "dumbbell-per-hand-kg",
+      "description": "Standing lateral raise performed one arm at a time, the free hand bracing on a fixed upright. Builds the side delt without the load ever passing overhead.",
+      "execution": [
+        "Hold a light dumbbell in one hand, the other hand braced on a rack upright.",
+        "With a slight bend in the elbow, raise the arm out to the side.",
+        "Stop at shoulder height, no higher.",
+        "Lower under control. Complete the weaker side first and match its reps on the stronger side."
+      ],
+      "cues": [
+        "Stop level with the shoulder",
+        "Lead with the elbow, not the hand"
+      ],
+      "common_errors": [
+        "Raising above shoulder height",
+        "Swinging the torso to launch the weight",
+        "Shrugging the trapezius to finish the rep"
+      ],
+      "rom_notes": [
+        "Never above shoulder height - this is what keeps the movement non-overhead."
+      ],
+      "muscles": [
+        {
+          "muscle": "lateral-deltoid",
+          "role": "primary"
+        },
+        {
+          "muscle": "anterior-deltoid",
+          "role": "secondary"
+        },
+        {
+          "muscle": "trapezius-middle",
+          "role": "stabiliser"
+        }
+      ],
+      "cautions": [
+        "Stopping level with the shoulder is what keeps this movement non-overhead, which is a firm constraint here. See health.md, 'Shoulder'.",
+        "Home pair is 3 kg, at which 20 reps are comfortable on all but the last set - below the useful training range. Use gym dumbbells for working sets; the home pair is for keeping the pattern warm, not for progression."
+      ],
+      "constraint_flags": [],
+      "requires": [
+        "dumbbell"
+      ]
+    },
+    {
+      "id": "single-arm-dumbbell-biceps-curl",
+      "movement": "elbow-flexion",
+      "aliases": [
+        "curl con manubrio"
+      ],
+      "load_type": "dumbbell-per-hand-kg",
+      "description": "Standing or seated dumbbell curl, one arm at a time. The catalogue's only direct elbow-flexion exercise. Verified: performed at home with a modular dumbbell.",
+      "execution": [
+        "Stand or sit with a dumbbell in one hand, arm hanging at the side, back straight.",
+        "Keep the elbow pinned against the ribs and the palm supinated, so the handle stays level through the movement.",
+        "Curl the weight up to the chest, moving only the forearm.",
+        "Lower under control to full extension.",
+        "Complete the weaker side first and match its reps on the stronger side."
+      ],
+      "cues": [
+        "Elbow stays pinned to the ribs",
+        "Only the forearm moves",
+        "Full extension at the bottom"
+      ],
+      "common_errors": [
+        "Swinging the elbow forward at the top",
+        "Using the torso to start the rep",
+        "Bracing by reaching the free arm behind the back - it works, but parks that shoulder in extension and internal rotation for the whole set. Sitting on a chair with a back achieves the same anti-swing effect with nothing held behind the body."
+      ],
+      "rom_notes": [
+        "Arm straight at the bottom; the shortened range is where most of the load is lost."
+      ],
+      "muscles": [
+        {
+          "muscle": "biceps-brachii",
+          "role": "primary"
+        },
+        {
+          "muscle": "brachialis",
+          "role": "secondary"
+        },
+        {
+          "muscle": "brachioradialis",
+          "role": "secondary"
+        }
+      ],
+      "cautions": [
+        "Home modular dumbbell load ladder is 1 / 3 / 5 / 7 / 9 kg only (1 kg handle, 2x2 kg and 4x1 kg discs loaded symmetrically). Currently at 7 kg, so ONE step remains and 7->9 kg is a 28% jump. A set of 0.5 kg discs would halve the increment to 1 kg and is the cheapest possible fix.",
+        "Gym dumbbells offer finer increments and no ceiling - prefer them once past 9 kg."
+      ],
+      "constraint_flags": [],
+      "requires": [
+        "dumbbell"
+      ]
+    },
+    {
+      "id": "leg-press-calf-press",
+      "movement": "calf-raise",
+      "aliases": [
+        "calf press alla pressa"
+      ],
+      "load_type": "stack-kg",
+      "description": "Calf raise performed on the horizontal leg press by placing the balls of the feet at the bottom edge of the platform. Uses a machine already in the program, so it adds no setup time.",
+      "execution": [
+        "Sit in the leg press with the balls of the feet on the lower edge of the platform, heels off.",
+        "Straighten the legs but keep a soft knee.",
+        "Push the platform away by plantarflexing the ankles.",
+        "Let the heels travel back toward the shins under control for a full stretch."
+      ],
+      "cues": [
+        "Full stretch at the bottom, full push at the top",
+        "Do not bend the knees to help"
+      ],
+      "common_errors": [
+        "Bouncing through a very short range",
+        "Bending the knees to turn it into a press"
+      ],
+      "rom_notes": [
+        "Range matters more than load here."
+      ],
+      "muscles": [
+        {
+          "muscle": "gastrocnemius",
+          "role": "primary"
+        },
+        {
+          "muscle": "soleus",
+          "role": "secondary"
+        }
+      ],
+      "cautions": [
+        "Flat, fully pronated feet: keep the load through the ball of the foot behind the first and fifth toes rather than rolling to the inside edge. See health.md, 'Feet'."
+      ],
+      "constraint_flags": [],
+      "requires": [
+        "machine"
+      ]
+    },
+    {
+      "id": "side-plank",
+      "movement": "anti-lateral-flexion",
+      "aliases": [
+        "plank laterale"
+      ],
+      "load_type": "time-seconds",
+      "description": "Isometric side hold on the forearm. Trains the trunk to resist being bent sideways - the frontal plane, where a lateral spinal curve lives.",
+      "execution": [
+        "Lie on one side, forearm on the floor, elbow under the shoulder.",
+        "Stack the feet and lift the hips so the body forms a straight line.",
+        "Hold, breathing normally.",
+        "Repeat on the other side. Record both sides; a large difference is information worth keeping."
+      ],
+      "cues": [
+        "Hips high, body in one line",
+        "Do not let the top shoulder roll forward"
+      ],
+      "common_errors": [
+        "Hips sagging toward the floor",
+        "Rotating toward the floor to make the hold easier"
+      ],
+      "rom_notes": [],
+      "muscles": [
+        {
+          "muscle": "obliques",
+          "role": "primary"
+        },
+        {
+          "muscle": "quadratus-lumborum",
+          "role": "primary"
+        },
+        {
+          "muscle": "gluteus-medius",
+          "role": "secondary"
+        },
+        {
+          "muscle": "transverse-abdominis",
+          "role": "stabiliser"
+        }
+      ],
+      "cautions": [],
+      "constraint_flags": [],
+      "requires": [
+        "bodyweight"
+      ]
+    },
+    {
+      "id": "cable-pallof-press",
+      "movement": "anti-rotation",
+      "aliases": [
+        "pallof press"
+      ],
+      "load_type": "stack-kg",
+      "description": "Standing anti-rotation press at a cable column set to chest height. The cable tries to twist the torso; the job is to refuse.",
+      "execution": [
+        "Set the pulley to chest height and stand side-on, feet shoulder-width.",
+        "Hold the handle with both hands at the sternum.",
+        "Press the hands straight out in front of the chest, resisting the pull toward the column.",
+        "Hold briefly, return to the chest. Repeat facing the other way."
+      ],
+      "cues": [
+        "Do not let the torso rotate at all",
+        "Hips and shoulders stay square"
+      ],
+      "common_errors": [
+        "Letting the torso turn toward the column",
+        "Using a weight so heavy that rotation is unavoidable"
+      ],
+      "rom_notes": [
+        "This is an anti-rotation exercise: the spine should not rotate under load."
+      ],
+      "muscles": [
+        {
+          "muscle": "obliques",
+          "role": "primary"
+        },
+        {
+          "muscle": "transverse-abdominis",
+          "role": "primary"
+        },
+        {
+          "muscle": "rectus-abdominis",
+          "role": "secondary"
+        },
+        {
+          "muscle": "gluteus-medius",
+          "role": "stabiliser"
+        }
+      ],
+      "cautions": [],
+      "constraint_flags": [],
+      "requires": [
+        "cable-column"
+      ]
+    },
+    {
+      "id": "prone-opposite-arm-leg-raise",
+      "movement": "contralateral-raise",
+      "aliases": [
+        "superman alternato"
+      ],
+      "load_type": "bodyweight",
+      "description": "Lying face down, raising one arm and the opposite leg. Trains the erectors and glutes one side at a time while the trunk resists rotating. Needs no equipment and works at home.",
+      "execution": [
+        "Lie face down, arms extended overhead, gaze down at the floor.",
+        "Raise one arm and the opposite leg a few centimetres off the floor.",
+        "Hold for about two seconds. The resting hand may stay in contact with the floor.",
+        "Lower and repeat on the other side."
+      ],
+      "cues": [
+        "Keep looking at the floor, do not lift the head",
+        "Raise slowly, no swinging"
+      ],
+      "common_errors": [
+        "Craning the neck to look forward",
+        "Lifting so high that the lower back arches hard"
+      ],
+      "rom_notes": [
+        "A few centimetres is enough; height is not the point."
+      ],
+      "muscles": [
+        {
+          "muscle": "erector-spinae",
+          "role": "primary"
+        },
+        {
+          "muscle": "gluteus-maximus",
+          "role": "secondary"
+        },
+        {
+          "muscle": "posterior-deltoid",
+          "role": "secondary"
+        },
+        {
+          "muscle": "obliques",
+          "role": "stabiliser"
+        }
+      ],
+      "cautions": [],
+      "constraint_flags": [],
+      "requires": [
+        "bodyweight"
+      ]
+    },
+    {
+      "id": "seated-machine-shoulder-press",
+      "movement": "overhead-push",
+      "aliases": [
+        "shoulder press",
+        "lento avanti alla macchina"
+      ],
+      "load_type": "stack-kg",
+      "description": "Seated machine press driving handles overhead. Retained in the library as a record of a movement that was tried and dropped - see the log for the reason.",
+      "execution": [
+        "Set the seat so the handles start at shoulder height.",
+        "Press the handles upward until the arms are nearly straight.",
+        "Lower under control to the start."
+      ],
+      "cues": [],
+      "common_errors": [],
+      "rom_notes": [],
+      "muscles": [
+        {
+          "muscle": "anterior-deltoid",
+          "role": "primary"
+        },
+        {
+          "muscle": "lateral-deltoid",
+          "role": "secondary"
+        },
+        {
+          "muscle": "triceps-brachii",
+          "role": "secondary"
+        },
+        {
+          "muscle": "trapezius-middle",
+          "role": "secondary"
+        }
+      ],
+      "cautions": [
+        "Caused a week of LOST OVERHEAD RANGE at roughly 15-20 kg - difficulty raising the arm enough to dress. Felt fine during the session; the problem appeared afterwards.",
+        "This was not delayed-onset muscle soreness: the load was trivial and DOMS does not remove range of motion for a week. See health.md, 'Shoulder'.",
+        "The same shoulder pops painlessly when raising a load overhead, and the movement is felt to be not smooth.",
+        "Fixed bilateral overhead path; the stronger side compensates and the asymmetry is loaded rather than trained.",
+        "Do not reintroduce. This is a firm constraint, not a preference to revisit once stronger. Lateral raises cover the side delt without going overhead."
+      ],
+      "constraint_flags": [
+        "overhead",
+        "rigid-bilateral"
+      ],
+      "requires": [
+        "machine"
+      ]
+    },
+    {
+      "id": "seated-cable-row",
+      "movement": "horizontal-pull",
+      "aliases": [
+        "pulley basso",
+        "rematore al cavo",
+        "low row"
+      ],
+      "load_type": "stack-kg",
+      "description": "Seated cable row. Horizontal pad, two angled foot platforms facing the user, cable emerging at seated chest height. Unsupported torso, so the trunk works isometrically throughout - a bigger movement than the lat pulldown and rated as markedly harder.",
+      "execution": [
+        "Sit on the pad and plant both feet on the angled platforms, knees slightly bent.",
+        "Take the handle with a neutral spine - bend at the hips with the knees bent, or scoot forward, rather than rounding over to reach it.",
+        "Sit up with the torso close to vertical, a slight backward lean only.",
+        "Pull the handle to the lower chest, driving the elbows back past the ribs and letting the shoulder blades come together.",
+        "Return under control to full arm extension without letting the torso get pulled forward into flexion."
+      ],
+      "cues": [
+        "Chest tall, lean back only slightly",
+        "Drive the elbows back, squeeze the shoulder blades",
+        "Do not let the cable pull you into a round back on the return"
+      ],
+      "common_errors": [
+        "Rocking the torso back and forth, which turns a back exercise into a lumbar one",
+        "Rounding forward on the return under load",
+        "Reaching for the handle from a rounded-over position at the start"
+      ],
+      "rom_notes": [
+        "Torso stays within roughly 10-15 degrees of vertical throughout. The range comes from the arms and shoulder blades, not from the spine."
+      ],
+      "muscles": [
+        {
+          "muscle": "latissimus-dorsi",
+          "role": "primary"
+        },
+        {
+          "muscle": "rhomboids",
+          "role": "primary"
+        },
+        {
+          "muscle": "trapezius-middle",
+          "role": "primary"
+        },
+        {
+          "muscle": "posterior-deltoid",
+          "role": "secondary"
+        },
+        {
+          "muscle": "biceps-brachii",
+          "role": "secondary"
+        },
+        {
+          "muscle": "teres-major",
+          "role": "secondary"
+        },
+        {
+          "muscle": "erector-spinae",
+          "role": "stabiliser"
+        },
+        {
+          "muscle": "trapezius-lower",
+          "role": "stabiliser"
+        }
+      ],
+      "cautions": [
+        "Taking the handle is the most lumbar-loading instant in the whole routine: reaching forward for a loaded stack with a rounded back. Set up with bent knees and a neutral spine. See health.md.",
+        "Not comparable to the lat pulldown by load. 45 kg here and 55 kg there are different machines and different movements."
+      ],
+      "constraint_flags": [
+        "rigid-bilateral"
+      ],
+      "requires": [
+        "machine"
+      ]
+    },
+    {
+      "id": "front-plank",
+      "movement": "anti-lateral-flexion",
+      "aliases": [
+        "plank"
+      ],
+      "load_type": "time-seconds",
+      "description": "Prone isometric hold on the forearms, body in a straight line. Anti-extension trunk work. Performed at home, currently 60-80 seconds.",
+      "execution": [
+        "Forearms on the floor, elbows under the shoulders, feet together.",
+        "Lift the hips so head, hips and heels form one line.",
+        "Brace and breathe normally for the hold."
+      ],
+      "cues": [
+        "One straight line, hips neither sagging nor piked",
+        "Squeeze the glutes"
+      ],
+      "common_errors": [
+        "Hips sagging",
+        "Holding the breath",
+        "Adding time instead of adding difficulty"
+      ],
+      "rom_notes": [
+        "Past roughly 45-60 seconds this becomes an endurance test rather than a strength stimulus. Progress by making it harder - lifting one foot or reaching one arm forward, which also adds an anti-rotation demand - not by holding longer."
+      ],
+      "muscles": [
+        {
+          "muscle": "transverse-abdominis",
+          "role": "primary"
+        },
+        {
+          "muscle": "rectus-abdominis",
+          "role": "primary"
+        },
+        {
+          "muscle": "obliques",
+          "role": "secondary"
+        },
+        {
+          "muscle": "gluteus-maximus",
+          "role": "stabiliser"
+        },
+        {
+          "muscle": "erector-spinae",
+          "role": "stabiliser"
+        }
+      ],
+      "cautions": [],
+      "constraint_flags": [],
+      "requires": [
+        "bodyweight"
+      ]
+    },
+    {
+      "id": "push-up",
+      "movement": "horizontal-push",
+      "aliases": [
+        "piegamenti"
+      ],
+      "load_type": "bodyweight",
+      "description": "Standard floor push-up. Self-reported as difficult despite a well-trained machine chest press - see cautions, the limiter is probably trunk stability rather than pressing strength.",
+      "execution": [
+        "Hands slightly wider than the shoulders, body in one straight line from head to heels.",
+        "Lower with the elbows at roughly 45 degrees to the torso, not flared wide.",
+        "Press back up without letting the hips sag or pike.",
+        "Elevate the hands on a bench or countertop to scale; lower the surface over months to progress."
+      ],
+      "cues": [
+        "It is a plank that presses - hold the line first",
+        "Elbows at 45 degrees, not out wide"
+      ],
+      "common_errors": [
+        "Hips sagging or piking",
+        "Elbows flaring to 90 degrees",
+        "Chasing depth at the bottom"
+      ],
+      "rom_notes": [
+        "Do NOT chase chest-to-floor depth. The bottom position is where a restricted shoulder is least protected - see health.md."
+      ],
+      "muscles": [
+        {
+          "muscle": "pectoralis-major",
+          "role": "primary"
+        },
+        {
+          "muscle": "triceps-brachii",
+          "role": "secondary"
+        },
+        {
+          "muscle": "anterior-deltoid",
+          "role": "secondary"
+        },
+        {
+          "muscle": "serratus-anterior",
+          "role": "secondary"
+        },
+        {
+          "muscle": "transverse-abdominis",
+          "role": "stabiliser"
+        },
+        {
+          "muscle": "rectus-abdominis",
+          "role": "stabiliser"
+        }
+      ],
+      "cautions": [
+        "A push-up is a plank that presses. Given a well-trained chest press and a very mobile trunk, the likely limiter is holding a rigid line, not pressing strength - passive range far exceeds active control. TEST: elevate the hands. If it suddenly feels easy, the limiter was trunk stability; if still hard, it is pressing strength.",
+        "Rigidly bilateral in the same way a machine is: hands fixed, one path, and the stronger side can take more of the load unnoticed. Bodyweight does not 'self-balance'."
+      ],
+      "constraint_flags": [
+        "rigid-bilateral"
+      ],
+      "requires": [
+        "bodyweight"
+      ]
+    },
+    {
+      "id": "bodyweight-squat",
+      "movement": "leg-press",
+      "aliases": [
+        "squat a corpo libero"
+      ],
+      "load_type": "bodyweight",
+      "description": "Unloaded squat. At a 95-100 kg leg press this is a movement-quality drill rather than a training stimulus - useful for knee tracking, not for building anything.",
+      "execution": [
+        "Feet shoulder-width, weight through the whole foot.",
+        "Sit down and back, keeping the knees tracking over the feet.",
+        "Descend only as far as the position can be actively controlled.",
+        "Drive up through the heels."
+      ],
+      "cues": [
+        "Knees track over the feet, do not let them fall inward",
+        "Stop where you still have control"
+      ],
+      "common_errors": [
+        "Knees collapsing inward as the arches flatten",
+        "Sinking to the bottom and resting on passive structures"
+      ],
+      "rom_notes": [
+        "Do not chase depth. With very mobile hips the bottom of a deep squat is passive end range, where the musculature has no authority. See health.md."
+      ],
+      "muscles": [
+        {
+          "muscle": "quadriceps",
+          "role": "primary"
+        },
+        {
+          "muscle": "gluteus-maximus",
+          "role": "primary"
+        },
+        {
+          "muscle": "adductors",
+          "role": "secondary"
+        },
+        {
+          "muscle": "gluteus-medius",
+          "role": "stabiliser"
+        }
+      ],
+      "cautions": [
+        "Flat, fully pronated feet: this is the main reason to do it at all - watch knee tracking. See health.md, 'Feet'."
+      ],
+      "constraint_flags": [],
+      "requires": [
+        "bodyweight"
+      ]
+    },
+    {
+      "id": "seated-leg-curl",
+      "movement": "knee-flexion",
+      "aliases": [
+        "leg curl",
+        "femorali"
+      ],
+      "load_type": "stack-kg",
+      "description": "Seated machine knee flexion. CONFIRMED on site 2026-09-19: exists, seated type, 5 kg stack increments. The only dedicated hamstring exercise available.",
+      "execution": [
+        "Set the back pad so the knee joint lines up with the machine's pivot.",
+        "Place the roller against the back of the lower calf, above the Achilles.",
+        "Lock the lap pad so the hips cannot lift.",
+        "Flex the knees through the full available range.",
+        "Return under control without letting the stack rest between reps."
+      ],
+      "cues": [
+        "Hips stay pinned under the pad",
+        "Control the return, do not let it snap back"
+      ],
+      "common_errors": [
+        "Lifting the hips to gain range",
+        "Range collapsing at the end of the set"
+      ],
+      "rom_notes": [
+        "Do not force the stretched position at the top of the return - end range is where an untrained hamstring is least protected. See health.md."
+      ],
+      "muscles": [
+        {
+          "muscle": "hamstrings",
+          "role": "primary"
+        },
+        {
+          "muscle": "gastrocnemius",
+          "role": "secondary"
+        }
+      ],
+      "cautions": [
+        "Hamstrings have never been trained directly. Start well below what feels right; first-exposure soreness here is pronounced and lasts days."
+      ],
+      "constraint_flags": [
+        "rigid-bilateral"
+      ],
+      "requires": [
+        "machine"
+      ]
+    },
+    {
+      "id": "seated-calf-raise",
+      "movement": "calf-raise",
+      "aliases": [
+        "calf seduto",
+        "sitting calf"
+      ],
+      "load_type": "stack-kg",
+      "description": "Seated calf raise - straddled seat with a pad across the thighs. CONFIRMED on site 2026-09-19. The bent knee shortens the gastrocnemius, which shifts the work onto the SOLEUS - the one calf muscle a leg-press calf raise does not reach.",
+      "execution": [
+        "Sit with the balls of the feet on the platform and the pad across the lower thighs.",
+        "Let the heels drop for a full stretch.",
+        "Press up onto the balls of the feet through the full range.",
+        "Lower under control."
+      ],
+      "cues": [
+        "Full range beats heavy load here",
+        "Pause briefly at the top"
+      ],
+      "common_errors": [
+        "Short bouncing reps",
+        "Loading so heavily the range collapses"
+      ],
+      "rom_notes": [],
+      "muscles": [
+        {
+          "muscle": "soleus",
+          "role": "primary"
+        },
+        {
+          "muscle": "gastrocnemius",
+          "role": "secondary"
+        }
+      ],
+      "cautions": [
+        "Complements rather than duplicates leg-press calf raises: bent knee targets soleus, straight knee targets gastrocnemius."
+      ],
+      "constraint_flags": [],
+      "requires": [
+        "machine"
+      ]
+    },
+    {
+      "id": "hip-abduction-machine",
+      "movement": "hip-abduction",
+      "aliases": [
+        "macchina del no",
+        "abduttori"
+      ],
+      "load_type": "stack-kg",
+      "description": "Seated hip abduction - pads outside the knees, legs driven apart. CONFIRMED on site 2026-09-19 (the 'no' half of the yes/no pair). The only direct gluteus medius work available.",
+      "execution": [
+        "Sit with the pads against the outside of the knees.",
+        "Drive the knees apart through the available range.",
+        "Return under control without letting the stack rest."
+      ],
+      "cues": [
+        "Sit tall, do not lean back to gain leverage",
+        "Control the return"
+      ],
+      "common_errors": [
+        "Rocking the torso to move the weight",
+        "Very short jerky range"
+      ],
+      "rom_notes": [
+        "Do not push into end range. Hip mobility is already abundant - see health.md."
+      ],
+      "muscles": [
+        {
+          "muscle": "gluteus-medius",
+          "role": "primary"
+        },
+        {
+          "muscle": "gluteus-maximus",
+          "role": "secondary"
+        }
+      ],
+      "cautions": [],
+      "constraint_flags": [
+        "rigid-bilateral"
+      ],
+      "requires": [
+        "machine"
+      ]
+    },
+    {
+      "id": "standing-glute-machine",
+      "movement": "hip-extension",
+      "aliases": [
+        "standing gluteus",
+        "glutei in piedi"
+      ],
+      "load_type": "stack-kg",
+      "description": "Standing single-leg hip extension against a pad. CONFIRMED on site 2026-09-19, never used. Unilateral by construction, which suits the asymmetry constraints well.",
+      "execution": [
+        "Stand facing the frame, holding the handles, torso upright.",
+        "Place one leg against the pad.",
+        "Drive the leg back and down by extending the hip, without arching the lower back.",
+        "Return under control. Weaker side first, stronger side matches its reps."
+      ],
+      "cues": [
+        "Movement comes from the hip, not from arching the back",
+        "Torso stays still"
+      ],
+      "common_errors": [
+        "Arching the lumbar spine to gain range",
+        "Leaning the torso forward as the leg goes back"
+      ],
+      "rom_notes": [
+        "Stop when the hip stops moving - any further range is the lower back, not the glute."
+      ],
+      "muscles": [
+        {
+          "muscle": "gluteus-maximus",
+          "role": "primary"
+        },
+        {
+          "muscle": "hamstrings",
+          "role": "secondary"
+        },
+        {
+          "muscle": "erector-spinae",
+          "role": "stabiliser"
+        }
+      ],
+      "cautions": [],
+      "constraint_flags": [],
+      "requires": [
+        "machine"
+      ]
+    },
+    {
+      "id": "machine-hip-thrust",
+      "movement": "hip-extension",
+      "aliases": [
+        "hip thrust",
+        "spinte in alto"
+      ],
+      "load_type": "stack-kg",
+      "description": "Machine hip thrust. CONFIRMED on site 2026-09-19: feet planted on a platform with knees at roughly 90 degrees, upper back flat on the cushion, pelvis driven up against a rolling pad. Supine and supported, no spinal compression, nothing overhead - fits the constraints in health.md unusually well.",
+      "execution": [
+        "Sit with the upper back against the cushion and the roller pad across the hips.",
+        "Plant the feet on the platform, knees at about 90 degrees at the top.",
+        "Drive the hips up until the torso and thighs form a line.",
+        "Lower under control without letting the weight rest at the bottom."
+      ],
+      "cues": [
+        "Drive through the heels",
+        "Finish with the glutes, not by arching the back",
+        "Ribs down"
+      ],
+      "common_errors": [
+        "Hyperextending the lower back at the top instead of finishing with the glutes",
+        "Feet too close, turning it into a quad exercise"
+      ],
+      "rom_notes": [
+        "The top position is a straight line, not an arch."
+      ],
+      "muscles": [
+        {
+          "muscle": "gluteus-maximus",
+          "role": "primary"
+        },
+        {
+          "muscle": "hamstrings",
+          "role": "secondary"
+        },
+        {
+          "muscle": "quadriceps",
+          "role": "secondary"
+        }
+      ],
+      "cautions": [
+        "Plate-loaded and somewhat clunky to set up. Widely assumed to be a machine for women; that is gym folklore, not a property of the equipment."
+      ],
+      "constraint_flags": [
+        "rigid-bilateral"
+      ],
+      "requires": [
+        "machine"
+      ]
+    },
+    {
+      "id": "cable-face-pull",
+      "movement": "rear-delt-fly",
+      "aliases": [
+        "face pull"
+      ],
+      "load_type": "stack-kg",
+      "description": "Rope face pull at a cable column set to roughly head height. Replaces the reverse pec deck, which does not exist at this gym - the pec deck does not reverse. Better suited anyway: constant tension, free path, and easily done one arm at a time.",
+      "execution": [
+        "Set the pulley at about head height and attach a rope handle.",
+        "Stand with a staggered stance, arms extended forward.",
+        "Pull the rope toward the face, driving the elbows high and outward.",
+        "Finish with the hands beside the ears and the shoulder blades together.",
+        "Return under control."
+      ],
+      "cues": [
+        "Elbows high and wide",
+        "Pull the rope apart as it arrives",
+        "Shoulders down, do not shrug"
+      ],
+      "common_errors": [
+        "Elbows dropping, turning it into a row",
+        "Shrugging the traps to finish",
+        "Leaning back to move a heavier stack"
+      ],
+      "rom_notes": [
+        "Stop where the shoulder blades stop moving; do not force the end position."
+      ],
+      "muscles": [
+        {
+          "muscle": "posterior-deltoid",
+          "role": "primary"
+        },
+        {
+          "muscle": "rhomboids",
+          "role": "primary"
+        },
+        {
+          "muscle": "trapezius-middle",
+          "role": "secondary"
+        },
+        {
+          "muscle": "infraspinatus",
+          "role": "secondary"
+        },
+        {
+          "muscle": "trapezius-lower",
+          "role": "secondary"
+        }
+      ],
+      "cautions": [
+        "Can be done single-arm, which is preferred here. Keep the load light enough that the elbows stay high - dropping them changes the exercise."
+      ],
+      "constraint_flags": [],
+      "requires": [
+        "cable-column"
+      ]
+    }
+  ]
+}
