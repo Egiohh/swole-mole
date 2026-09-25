@@ -140,7 +140,9 @@ function icon(id) {
 }
 
 function renderList() {
-  $('#list').innerHTML = program.map(item => {
+  // Completed exercises sink to the bottom; otherwise program order (sort is stable).
+  const order = [...program].sort((a, b) => isComplete(a) - isComplete(b));
+  $('#list').innerHTML = order.map(item => {
     const id = item.exercise;
     const e = day.ex[id];
     let sub;
@@ -205,7 +207,7 @@ function renderDetail() {
   const scroll = detail.scrollTop;
   detail.innerHTML = `
     <header class="bar">
-      <button class="back" data-act="back" aria-label="Back">‹</button>
+      <button class="back" data-act="back" aria-label="Back"><span>‹</span>${icon(esc(id))}</button>
       <div><h2>${esc(name(id))}</h2>${ex.aliases?.length ? `<div class="sub">${esc(ex.aliases.join(' · '))}</div>` : ''}</div>
     </header>
     ${target ? `<p class="target">${esc(target)}</p>` : ''}

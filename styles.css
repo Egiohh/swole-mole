@@ -110,13 +110,18 @@ button, input, textarea { font: inherit; color: inherit; }
   z-index: 1;
 }
 .bar h2 { font-size: 20px; margin: 0; }
+/* Chevron + exercise icon, one tap target. The back swipe works too. */
 .back {
-  width: var(--tap);
-  height: var(--tap);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-height: var(--tap);
+  padding: 0 4px 0 6px;
   flex: none;
   border: 0;
   background: none;
-  font-size: 40px;
+  color: var(--muted);
+  font-size: 28px;
   line-height: 1;
 }
 

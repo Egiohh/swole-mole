@@ -96,10 +96,12 @@ Tapping a row expands it to fullscreen:
   instruction (pause on the handles before standing). Cautions are styled to be
   hard to miss; never hide or truncate them.
 - Per-exercise note, collapsed by default.
-- Back (button or Android back gesture) returns to the list at the same scroll
+- Header: a small `‹` plus the exercise icon, one tap target, left of the name.
+  Tapping it or the Android back swipe returns to the list at the same scroll
   position.
 
-A row goes grey once the planned number of sets is committed. **Completion is
+A row goes grey once the planned number of sets is committed, and completed
+rows sink to the bottom of the list (otherwise program order). **Completion is
 derived from the committed sets — never persist a "completed" field.**
 
 **Rest timer.** Committing a set shows a count-up of elapsed rest.
