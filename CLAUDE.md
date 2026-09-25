@@ -59,12 +59,13 @@ a specific failure mode.
 Each stage must be independently useful. v0 must be usable at the gym before
 any infrastructure work.
 
-- **v0 — Today tab only. ← BUILT, not yet field-tested.** PWA shell, exercise
-  list, expand-to-fullscreen entry, per-set done flags, load/reps steppers, cues
-  and cautions, completed-row greying, rest timer, IndexedDB persistence,
-  "last time" prefill.
-- **v1 — export.** Share-to-Drive button and tab 3 (day note, mood chips,
-  unexported-session count). One file per session.
+- **v0 — Today tab only. ← BUILT.** PWA shell, exercise list,
+  expand-to-fullscreen entry, set-by-set commit, load/reps steppers, cues and
+  cautions, completed-row greying, rest timer, IndexedDB persistence, "last
+  time" prefill.
+- **v1 — export. ← BUILT, not yet field-tested.** Bottom tab bar (Today /
+  Day), the Day tab (mood chips, day note), share-to-Drive with the unexported
+  count. One file per session.
 - **v1.5 — tab 2.** "Not in program" / "At home" list, and `coaching.json`.
 - **v2 — only if ever actually wanted.** Nothing planned. No speculative
   features. Charts, history and statistics are explicitly *not* wanted.
@@ -136,17 +137,36 @@ nagging. Anything logged from tab 2 goes into the same day object.
 A **freeform** entry also lives here: a text field for a movement with no
 library id (see data contract).
 
-### Tab 3 — Day & notes (v1)
+### Tab 3 — Day (v1)
 
+Navigation is a bottom tab bar: **Today** and **Day** (tab 2 joins in v1.5).
+The Day tab badge shows the number of unexported sessions.
+
+- **Mood chips** → the day's `state` array. Multi-select emoji chips (`MOODS`
+  in `app.js`): `good-day`, `strong`, `slept-badly`, `low-energy`, `sore`,
+  `hot`, `stressed`, `rushed`. Keep it small and playful; stick to emoji old
+  enough to render on any Android.
 - Free-text day note.
-- **Mood chips** → the day's `state` array. Multi-select emoji chips. Starter
-  set: `slept-badly`, `low-energy`, `good-day`, `strong`, `sore`, `hot`,
-  `stressed`, `rushed`. Keep it small and playful.
+- **Export button**: "Share N sessions to Drive", listing the unexported dates
+  (slightly nagging — the export is also the backup). Shares every pending day
+  at once, one file each.
 - **Coaching notes** (v1.5): read-only text from `coaching.json` in this repo,
   written by Claude in the data project. Same origin, cached for offline. The
   app never writes it.
-- The export/share button, with the count of unexported sessions visible and
-  slightly nagging (the export is also the backup).
+
+**Export mechanics** (`exportDays()` in `app.js`):
+- A day is *pending* while it has content and its current `toDay()` output
+  differs from the snapshot stored in the record's `exported` field when it was
+  last shared. Editing an exported day makes it pending again; re-sharing
+  produces a second file for the same date, and the merge step in the data
+  project must take the newest.
+- **Chrome on Android only shares an allow-list of file types, and `.json` is
+  not on it.** The app offers `YYYY-MM-DD.json` first, then `YYYY-MM-DD.txt`
+  (text/plain, identical JSON content), then falls back to copying the JSON to
+  the clipboard. In practice files arrive in Drive as `.txt`.
+- Dismissing the share sheet (AbortError) changes nothing. A day is marked
+  exported only when `navigator.share` resolves (a target was chosen) or the
+  clipboard write succeeded.
 
 ## Data contract
 
@@ -170,7 +190,8 @@ machines), dumbbell 1 kg, added weight 2.5 kg, time 5 s.
 
 ### Output
 
-One file per session, `YYYY-MM-DD.json`, a single **day** object:
+One file per session, `YYYY-MM-DD.json` (in practice `.txt` on Android — see
+"Export mechanics"), a single **day** object:
 
 ```json
 {

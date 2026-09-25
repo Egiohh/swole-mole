@@ -1,4 +1,4 @@
-// Swole Mole - v0: the Today tab. Spec and rules: CLAUDE.md.
+// Swole Mole - v1: Today tab, Day tab, export. Spec and rules: CLAUDE.md.
 'use strict';
 
 // +/- step and unit label per load_type (see CLAUDE.md, "Data contract").
@@ -7,12 +7,22 @@ const UNIT = { 'stack-kg': 'kg', 'dumbbell-per-hand-kg': 'kg per hand', 'bodywei
 const REST_HIDE_MS = 30 * 60 * 1000;      // rest timer disappears after 30 min
 const NEW_DAY_IDLE_MS = 3 * 60 * 60 * 1000; // past midnight, stay on the old day until 3 h idle
 
+// Mood chips -> the day's "state" array. Tag values are fixed by log.schema.json.
+const MOODS = [
+  ['good-day', '🙂', 'good day'], ['strong', '💪', 'strong'], ['slept-badly', '😴', 'slept badly'],
+  ['low-energy', '🐌', 'low energy'], ['sore', '🤕', 'sore'], ['hot', '🥵', 'hot'],
+  ['stressed', '😬', 'stressed'], ['rushed', '⏱️', 'rushed'],
+];
+
 let exercises = {};   // id -> library entry
 let program = [];     // program items: { exercise, sets, rep_range, per_side, note }
 let bundledLast = {}; // id -> { date, load, reps } from data/last.json
 let last = {};        // id -> most recent { date, load, reps }, bundled or local
-let day = null;       // today's record: { date, note, state, ex: { id: { load, reps, done, rir, note } } }
+let days = [];        // every day record in IndexedDB, today's included
+let day = null;       // today's record: { date, note, state, ex: { id: entry }, exported }
 let openId = null;    // exercise shown fullscreen, or null
+let tab = 'today';    // 'today' | 'day'
+const tabScroll = {}; // window scroll per tab
 
 const $ = sel => document.querySelector(sel);
 const pad = n => String(n).padStart(2, '0');
@@ -52,8 +62,8 @@ async function dbAll() {
 }
 
 // Called on every change - there is no save button.
-async function save() {
-  (await db()).transaction('days', 'readwrite').objectStore('days').put(day);
+async function save(rec = day) {
+  (await db()).transaction('days', 'readwrite').objectStore('days').put(rec);
 }
 
 // ---------- Day record -> log.schema.json "day" object ----------
@@ -231,8 +241,87 @@ function renderRest() {
   if (!el.hidden) el.textContent = `Rest ${Math.floor(ms / 60000)}:${pad(Math.floor(ms / 1000) % 60)}`;
 }
 
+function fmtDate(date) {
+  return new Date(date + 'T12:00').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+}
+
+function renderDayTab() {
+  $('#daytab').innerHTML = `
+    <label class="lbl">How was today? <span>${esc(fmtDate(day.date))}</span></label>
+    <div class="moods">${MOODS.map(([tag, emoji, label]) =>
+      `<button class="mood${day.state.includes(tag) ? ' on' : ''}" data-mood="${tag}"><span>${emoji}</span>${label}</button>`).join('')}</div>
+    <label class="lbl">Day note</label>
+    <textarea data-field="daynote" rows="4" placeholder="Weather, schedule, how it felt…">${esc(day.note)}</textarea>
+    <div id="export"></div>`;
+  renderExport();
+}
+
+// ---------- Export: one file per day, through the Android share sheet ----------
+
+// A day is unexported while its current output differs from what was last
+// shared - so editing an exported day makes it pending again.
+function pendingDays() {
+  return days
+    .filter(d => { const out = toDay(d); return (out.note || out.state || out.exercises) && d.exported !== JSON.stringify(out); })
+    .sort((a, b) => b.date.localeCompare(a.date));
+}
+
+function renderExport(msg = '') {
+  const pending = pendingDays();
+  const badge = $('#badge');
+  badge.hidden = !pending.length;
+  badge.textContent = pending.length;
+  const el = $('#export');
+  if (!el) return;
+  el.innerHTML = pending.length ? `
+    <button class="share" data-act="export">Share ${pending.length} session${pending.length > 1 ? 's' : ''} to Drive</button>
+    <p class="nag">Not exported yet: ${pending.map(d => esc(fmtDate(d.date)) + (d === day ? ' (today)' : '')).join(', ')}</p>
+    <p class="sub">Pick Drive, then the SwoleMole-Inbox folder. The export is also your backup.</p>`
+    : '<p class="sub">All sessions exported ✓</p>';
+  if (msg) el.insertAdjacentHTML('beforeend', `<p class="msg">${esc(msg)}</p>`);
+}
+
+// Chrome on Android only shares an allow-list of file types and .json is not on
+// it, so fall back to .txt (same JSON inside), then to the clipboard.
+async function exportDays() {
+  const list = pendingDays();
+  if (!list.length) return;
+  const files = ext => list.map(d => new File([JSON.stringify(toDay(d), null, 2) + '\n'], `${d.date}.${ext}`,
+    { type: ext === 'json' ? 'application/json' : 'text/plain' }));
+  let msg = '';
+  try {
+    const share = [files('json'), files('txt')].find(f => navigator.canShare?.({ files: f }));
+    if (share) {
+      await navigator.share({ files: share });
+    } else {
+      const out = list.map(toDay);
+      await navigator.clipboard.writeText(JSON.stringify(out.length === 1 ? out[0] : out, null, 2));
+      msg = 'Sharing files is not available here, so the JSON was copied to the clipboard.';
+    }
+  } catch (err) {
+    if (err.name !== 'AbortError') renderExport('Export failed: ' + err.message); // AbortError = share sheet dismissed
+    return;
+  }
+  for (const d of list) {
+    d.exported = JSON.stringify(toDay(d));
+    await save(d);
+  }
+  renderExport(msg);
+}
+
+function showTab(name) {
+  tabScroll[tab] = window.scrollY;
+  tab = name;
+  $('#list').hidden = tab !== 'today';
+  $('#daytab').hidden = tab !== 'day';
+  document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
+  if (tab === 'day') renderDayTab();
+  window.scrollTo(0, tabScroll[tab] ?? 0);
+}
+
 function render() {
   renderList();
+  renderDayTab();
   if (openId) renderDetail();
   renderRest();
 }
@@ -287,6 +376,7 @@ $('#detail').addEventListener('click', ev => {
   save();
   renderDetail();
   renderRest();
+  renderExport();
 });
 
 // Typing updates state without re-rendering, so the field keeps focus.
@@ -298,6 +388,31 @@ $('#detail').addEventListener('input', ev => {
   else if (f === 'note') e.note = ev.target.value;
   else return;
   save();
+  renderExport();
+});
+
+$('.tabs').addEventListener('click', ev => {
+  const b = ev.target.closest('button');
+  if (b) showTab(b.dataset.tab);
+});
+
+$('#daytab').addEventListener('click', ev => {
+  const b = ev.target.closest('button');
+  if (!b) return;
+  if (b.dataset.act === 'export') { exportDays(); return; }
+  const tag = b.dataset.mood;
+  if (!tag) return;
+  day.state = day.state.includes(tag) ? day.state.filter(t => t !== tag) : [...day.state, tag];
+  b.classList.toggle('on');
+  save();
+  renderExport();
+});
+
+$('#daytab').addEventListener('input', ev => {
+  if (ev.target.dataset.field !== 'daynote') return;
+  day.note = ev.target.value;
+  save();
+  renderExport();
 });
 
 // Android suspends timers in the background: recompute everything on return.
@@ -310,11 +425,11 @@ document.addEventListener('visibilitychange', async () => {
 // ---------- Startup ----------
 
 async function loadDay() {
-  const all = await dbAll();
+  days = (await dbAll()).map(upgrade);
   const key = todayKey();
-  all.forEach(upgrade);
-  day = all.find(d => d.date === key) ?? { date: key, note: '', state: [], ex: {} };
-  buildLast(all.filter(d => d.date !== key));
+  day = days.find(d => d.date === key);
+  if (!day) days.push(day = { date: key, note: '', state: [], ex: {} });
+  buildLast(days.filter(d => d !== day));
   if (openId) { closeDetail(); history.back(); }
   render();
 }

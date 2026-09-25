@@ -57,7 +57,7 @@ button, input, textarea { font: inherit; color: inherit; }
 #list {
   list-style: none;
   margin: 0;
-  padding: 0 12px 96px; /* room for the rest timer */
+  padding: 0 12px 160px; /* room for the rest timer and the tab bar */
 }
 
 .row {
@@ -86,6 +86,77 @@ button, input, textarea { font: inherit; color: inherit; }
 
 .empty { padding: 24px 12px; color: var(--muted); }
 
+/* ---------- Tab bar ---------- */
+
+.tabs {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  padding-bottom: env(safe-area-inset-bottom);
+  background: var(--surface);
+  border-top: 1px solid var(--surface-2);
+  z-index: 1;
+}
+.tabs button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 60px;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-weight: 600;
+}
+.tabs button span { font-size: 22px; }
+.tabs button.on { color: var(--accent); }
+#badge {
+  min-width: 22px;
+  padding: 1px 6px;
+  border-radius: 11px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 13px;
+}
+
+/* ---------- Day tab ---------- */
+
+#daytab { padding: 0 16px 160px; }
+#daytab .lbl:first-child { margin-top: 4px; }
+
+.moods { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.mood {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: var(--tap);
+  padding: 0 14px;
+  border: 2px solid transparent;
+  border-radius: 28px;
+  background: var(--surface);
+  text-align: left;
+}
+.mood span { font-size: 24px; }
+.mood.on { border-color: var(--accent); background: var(--surface-2); font-weight: 600; }
+
+.share {
+  width: 100%;
+  min-height: var(--tap);
+  margin-top: 28px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 18px;
+  font-weight: 700;
+}
+.nag { margin: 12px 0 4px; color: var(--accent); font-weight: 600; }
+.msg { color: var(--warn-text); }
+#export > .sub:only-child { margin-top: 28px; }
+
 /* ---------- Detail (fullscreen over the list, so list scroll is kept) ---------- */
 
 #detail {
@@ -95,6 +166,7 @@ button, input, textarea { font: inherit; color: inherit; }
   overscroll-behavior: contain;
   background: var(--bg);
   padding: 0 16px 112px;
+  z-index: 3; /* covers the tab bar */
 }
 
 .bar {
@@ -231,7 +303,7 @@ textarea {
 #rest {
   position: fixed;
   left: 50%;
-  bottom: max(16px, env(safe-area-inset-bottom));
+  bottom: calc(72px + env(safe-area-inset-bottom)); /* clear of the tab bar */
   transform: translateX(-50%);
   padding: 12px 28px;
   border-radius: 28px;
@@ -241,6 +313,6 @@ textarea {
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-  z-index: 2;
+  z-index: 4;
 }
 [hidden] { display: none !important; }
