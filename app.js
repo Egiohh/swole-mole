@@ -1,4 +1,4 @@
-// Swole Mole - v1: Today tab, Day tab, export. Spec and rules: CLAUDE.md.
+// Swole Mole - Today, More and Day tabs, export. Spec and rules: CLAUDE.md.
 'use strict';
 
 // +/- step and unit label per load_type (see CLAUDE.md, "Data contract").
@@ -20,14 +20,18 @@ let bundledLast = {}; // id -> { date, load, reps } from data/last.json
 let last = {};        // id -> most recent { date, load, reps }, bundled or local
 let days = [];        // every day record in IndexedDB, today's included
 let day = null;       // today's record: { date, note, state, ex: { id: entry }, exported }
+let venues = null;    // data/venues.json "venues": { gym, home }
+let coaching = null;  // data/coaching.json { updated, text }, or null when absent
 let openId = null;    // exercise shown fullscreen, or null
-let tab = 'today';    // 'today' | 'day'
+let tab = 'today';    // 'today' | 'more' | 'day'
+let moreView = 'other'; // tab 2 toggle: 'other' (not in program) | 'home'
 const tabScroll = {}; // window scroll per tab
 
 const $ = sel => document.querySelector(sel);
 const pad = n => String(n).padStart(2, '0');
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-const name = id => id.charAt(0).toUpperCase() + id.slice(1).replace(/-/g, ' ');
+const isFreeform = id => id.startsWith('ff-');
+const name = id => isFreeform(id) ? day.ex[id]?.freeform ?? '' : id.charAt(0).toUpperCase() + id.slice(1).replace(/-/g, ' ');
 const loadType = id => exercises[id]?.load_type ?? 'stack-kg';
 const hasLoad = id => loadType(id) !== 'bodyweight';
 const hasReps = id => loadType(id) !== 'time-seconds';
@@ -77,7 +81,7 @@ function toDay(rec) {
   const list = [];
   for (const [id, e] of Object.entries(rec.ex)) {
     if (!e.sets.length && !e.note) continue;
-    const p = { exercise: id };
+    const p = e.freeform ? { freeform: e.freeform, status: 'trialing' } : { exercise: id };
     if (hasLoad(id) && e.load != null) p.load = e.load;
     if (e.sets.length) {
       p.sets = e.sets.length;
@@ -95,13 +99,29 @@ function buildLast(pastDays) {
   last = { ...bundledLast };
   for (const d of pastDays.sort((a, b) => a.date.localeCompare(b.date))) {
     for (const p of toDay(d).exercises ?? []) {
+      if (p.freeform) continue;
       if (!last[p.exercise] || last[p.exercise].date <= d.date) last[p.exercise] = { date: d.date, load: p.load, reps: p.reps };
     }
   }
 }
 
 // An exercise entry: { load, sets: [{ reps, at }] (committed, in order),
-// next: reps for the set being worked on, rir, note }.
+// next: reps for the set being worked on, rir, note }. A freeform entry (a
+// movement with no library id) is keyed "ff-<timestamp>" and also carries
+// `freeform`, its description.
+
+// The program item for an id, or a bare item (no planned sets) for anything
+// logged from tab 2.
+function itemFor(id) {
+  return program.find(p => p.exercise === id) ?? { exercise: id };
+}
+
+function addFreeform(text) {
+  const id = 'ff-' + Date.now();
+  day.ex[id] = { freeform: text, load: null, sets: [], next: null, rir: null, note: '' };
+  save();
+  return id;
+}
 
 // Reps to offer for set number i (0-based): last session's same set, else the
 // set just committed.
@@ -128,9 +148,10 @@ function upgrade(rec) {
   return rec;
 }
 
-// Completion is derived from the committed sets, never stored.
+// Completion is derived from the committed sets, never stored. Without planned
+// sets (tab 2) nothing is ever "complete".
 function isComplete(item) {
-  return (day.ex[item.exercise]?.sets.length ?? 0) >= (item.sets ?? 1);
+  return !!item.sets && (day.ex[item.exercise]?.sets.length ?? 0) >= item.sets;
 }
 
 function lastDoneAt() {
@@ -146,29 +167,61 @@ function loadText(id, load) {
 
 function icon(id) {
   // The grey square is the neutral fallback; the image covers it when it exists.
+  if (isFreeform(id)) return '<div class="ico"></div>';
   return `<div class="ico"><img src="icons/exercises/${id}.svg" alt="" onerror="this.remove()"></div>`;
 }
 
+function rowHtml(item) {
+  const id = item.exercise;
+  const e = day.ex[id];
+  let sub;
+  if (e?.sets.length) {
+    const n = item.sets ? `${e.sets.length}/${item.sets} sets` : `${e.sets.length} set${e.sets.length > 1 ? 's' : ''}`;
+    sub = `today: ${n} · ${loadText(id, e.load)}`;
+  } else if (isFreeform(id)) {
+    sub = 'new movement · trialing';
+  } else if (last[id]) {
+    const reps = last[id].reps?.map(r => r ?? '?').join(' ');
+    sub = `last: ${loadText(id, last[id].load)}${reps ? ' · ' + reps : ''}`;
+  } else {
+    sub = 'no history yet';
+  }
+  return `<li class="row${isComplete(item) ? ' complete' : ''}" data-id="${esc(id)}">
+    ${icon(esc(id))}
+    <div><div class="name">${esc(name(id))}</div><div class="sub">${esc(sub)}</div></div>
+  </li>`;
+}
+
+// Completed exercises sink to the bottom; otherwise the given order (sort is stable).
+const byDone = items => [...items].sort((a, b) => isComplete(a) - isComplete(b));
+
 function renderList() {
-  // Completed exercises sink to the bottom; otherwise program order (sort is stable).
-  const order = [...program].sort((a, b) => isComplete(a) - isComplete(b));
-  $('#list').innerHTML = order.map(item => {
-    const id = item.exercise;
-    const e = day.ex[id];
-    let sub;
-    if (e?.sets.length) {
-      sub = `today: ${e.sets.length}/${item.sets ?? '?'} sets · ${loadText(id, e.load)}`;
-    } else if (last[id]) {
-      const reps = last[id].reps?.map(r => r ?? '?').join(' ');
-      sub = `last: ${loadText(id, last[id].load)}${reps ? ' · ' + reps : ''}`;
-    } else {
-      sub = 'no history yet';
-    }
-    return `<li class="row${isComplete(item) ? ' complete' : ''}" data-id="${esc(id)}">
-      ${icon(esc(id))}
-      <div><div class="name">${esc(name(id))}</div><div class="sub">${esc(sub)}</div></div>
-    </li>`;
-  }).join('') || '<li class="empty">The program is empty. Run tools/sync_data.py.</li>';
+  $('#list').innerHTML = byDone(program).map(rowHtml).join('')
+    || '<li class="empty">The program is empty. Run tools/sync_data.py.</li>';
+}
+
+// Tab 2. "At home" is derived: an exercise qualifies when everything it
+// requires is in venues.home.equipment. Never store it on the exercise.
+function renderMore() {
+  const inProgram = new Set(program.map(p => p.exercise));
+  const home = new Set(venues?.home?.equipment ?? []);
+  const lib = Object.values(exercises).sort((a, b) => a.id.localeCompare(b.id));
+  const pick = moreView === 'home'
+    ? lib.filter(x => x.requires.every(r => home.has(r)))
+    : lib.filter(x => !inProgram.has(x.id));
+  const freeform = Object.keys(day.ex).filter(isFreeform).map(id => ({ exercise: id }));
+  const toggle = [['other', 'Not in program'], ['home', 'At home']].map(([v, label]) =>
+    `<button class="${moreView === v ? 'on' : ''}" data-view="${v}">${label}</button>`).join('');
+  $('#more').innerHTML = `
+    <div class="segmented">${toggle}</div>
+    ${moreView === 'home' ? bullets(venues?.home?.notes, 'rom') : ''}
+    <ul class="rows">${[...freeform, ...byDone(pick.map(x => ({ exercise: x.id })))].map(rowHtml).join('')}</ul>
+    <label class="lbl">Doing something not in the library?</label>
+    <div class="addff">
+      <input data-field="freeform" enterkeyhint="done" placeholder="e.g. standing cable pullover">
+      <button data-act="addff">Add</button>
+    </div>
+    <p class="sub">Logged as a trial. It becomes a real library entry later, in the Gym project, if it sticks.</p>`;
 }
 
 function stepper(field, value) {
@@ -185,7 +238,7 @@ function bullets(list, cls) {
 }
 
 function renderDetail() {
-  const item = program.find(p => p.exercise === openId);
+  const item = itemFor(openId);
   const id = openId;
   const ex = exercises[id] ?? {};
   const e = entry(item);
@@ -207,8 +260,9 @@ function renderDetail() {
       <button class="tick" data-act="commit" aria-label="Set ${n} done">✓</button>
     </div>`;
 
-  // Reps in reserve: asked once the planned sets are done, in plain words.
-  const rir = isComplete(item) ? `
+  // Reps in reserve: asked once the planned sets are done (or, with no plan,
+  // after the first set), in plain words.
+  const rir = (item.sets ? isComplete(item) : e.sets.length > 0) ? `
     <label class="lbl">Reps left in the tank on the last set?</label>
     <div class="chips">${[0, 1, 2, 3, 4].map(r =>
       `<button class="chip${e.rir === r ? ' on' : ''}" data-act="rir" data-n="${r}">${r === 4 ? '4+' : r}</button>`).join('')}</div>` : '';
@@ -221,6 +275,7 @@ function renderDetail() {
       <div><h2>${esc(name(id))}</h2>${ex.aliases?.length ? `<div class="sub">${esc(ex.aliases.join(' · '))}</div>` : ''}</div>
     </header>
     ${target ? `<p class="target">${esc(target)}</p>` : ''}
+    ${isFreeform(id) ? '<p class="target">New movement · logged as a trial</p>' : ''}
     ${item.note ? `<p class="sub">${esc(item.note)}</p>` : ''}
     ${hasLoad(id) ? `<label class="lbl">Load <span>${UNIT[loadType(id)]}</span></label>${stepper('load', e.load)}` : '<p class="lbl">Bodyweight</p>'}
     <label class="lbl">Sets</label>
@@ -229,7 +284,8 @@ function renderDetail() {
     ${bullets(ex.cues, 'cues')}
     ${bullets(ex.rom_notes, 'rom')}
     ${bullets(ex.cautions, 'cautions')}
-    <details${e.note ? ' open' : ''}><summary>Note</summary><textarea data-field="note" rows="3">${esc(e.note)}</textarea></details>`;
+    <details${e.note ? ' open' : ''}><summary>Note</summary><textarea data-field="note" rows="3">${esc(e.note)}</textarea></details>
+    ${isFreeform(id) && !e.sets.length ? '<button class="remove" data-act="remove">Remove this entry</button>' : ''}`;
   detail.scrollTop = scroll;
 }
 
@@ -245,8 +301,18 @@ function fmtDate(date) {
   return new Date(date + 'T12:00').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
 }
 
+// Read-only notes written by Claude in the Gym project (data/coaching.json).
+function coachingHtml() {
+  if (!coaching?.text) return '';
+  return `<details class="coach" open>
+      <summary>Coaching notes${coaching.updated ? ` <span>· ${esc(fmtDate(coaching.updated))}</span>` : ''}</summary>
+      <p>${esc(coaching.text)}</p>
+    </details>`;
+}
+
 function renderDayTab() {
   $('#daytab').innerHTML = `
+    ${coachingHtml()}
     <label class="lbl">How was today? <span>${esc(fmtDate(day.date))}</span></label>
     <div class="moods">${MOODS.map(([tag, emoji, label]) =>
       `<button class="mood${day.state.includes(tag) ? ' on' : ''}" data-mood="${tag}"><span>${emoji}</span>${label}</button>`).join('')}</div>
@@ -313,14 +379,17 @@ function showTab(name) {
   tabScroll[tab] = window.scrollY;
   tab = name;
   $('#list').hidden = tab !== 'today';
+  $('#more').hidden = tab !== 'more';
   $('#daytab').hidden = tab !== 'day';
   document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
+  if (tab === 'more') renderMore();
   if (tab === 'day') renderDayTab();
   window.scrollTo(0, tabScroll[tab] ?? 0);
 }
 
 function render() {
   renderList();
+  renderMore();
   renderDayTab();
   if (openId) renderDetail();
   renderRest();
@@ -339,7 +408,8 @@ function openDetail(id) {
 function closeDetail() {
   openId = null;
   $('#detail').hidden = true;
-  renderList(); // the list itself is never hidden, so its scroll position survives
+  renderList(); // the lists are never hidden by the detail view, so scroll positions survive
+  renderMore();
 }
 
 window.addEventListener('popstate', () => { if (openId) closeDetail(); });
@@ -351,12 +421,36 @@ $('#list').addEventListener('click', ev => {
   if (row) openDetail(row.dataset.id);
 });
 
+function submitFreeform() {
+  const input = $('#more [data-field=freeform]');
+  const text = input.value.trim();
+  if (text) openDetail(addFreeform(text));
+}
+
+$('#more').addEventListener('click', ev => {
+  const row = ev.target.closest('.row');
+  if (row) { openDetail(row.dataset.id); return; }
+  const b = ev.target.closest('button');
+  if (b?.dataset.view) { moreView = b.dataset.view; renderMore(); }
+  else if (b?.dataset.act === 'addff') submitFreeform();
+});
+
+$('#more').addEventListener('keydown', ev => {
+  if (ev.key === 'Enter' && ev.target.dataset.field === 'freeform') submitFreeform();
+});
+
 $('#detail').addEventListener('click', ev => {
   const b = ev.target.closest('button');
   if (!b) return;
   const e = day.ex[openId];
   switch (b.dataset.act) {
     case 'back': history.back(); return;
+    case 'remove': // a freeform entry added by mistake, nothing committed yet
+      delete day.ex[openId];
+      save();
+      renderExport();
+      history.back();
+      return;
     case 'commit': // the timestamp starts the rest timer
       e.sets.push({ reps: hasReps(openId) ? e.next : null, at: Date.now() });
       e.next = prefillReps(openId, e.sets.length);
@@ -368,7 +462,7 @@ $('#detail').addEventListener('click', ev => {
       const sign = b.dataset.act === 'inc' ? 1 : -1;
       if (b.dataset.field === 'load') e.load = Math.max(0, round((e.load ?? 0) + sign * (STEP[loadType(openId)] ?? 1)));
       else if (e.next != null) e.next = Math.max(0, e.next + sign);
-      else e.next = program.find(p => p.exercise === openId)?.rep_range?.[1] ?? 0; // empty field: start somewhere sensible
+      else e.next = itemFor(openId).rep_range?.[1] ?? 10; // empty field: start somewhere sensible
       break;
     }
     default: return;
@@ -440,10 +534,14 @@ async function start() {
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
   try {
     const get = url => fetch(url).then(r => { if (!r.ok) throw new Error(`${url}: ${r.status}`); return r.json(); });
-    const [lib, prog, lastJson] = await Promise.all([get('data/exercises.json'), get('data/program.json'), get('data/last.json')]);
+    const optional = url => get(url).catch(() => null); // missing file = feature hidden
+    const [lib, prog, lastJson, ven, coach] = await Promise.all([get('data/exercises.json'), get('data/program.json'),
+      get('data/last.json'), optional('data/venues.json'), optional('data/coaching.json')]);
     lib.exercises.forEach(e => { exercises[e.id] = e; });
     program = prog.blocks.flatMap(b => b.items); // one flat list, whatever the blocks
     bundledLast = lastJson;
+    venues = ven?.venues ?? null;
+    coaching = coach;
     await loadDay();
     setInterval(renderRest, 1000);
   } catch (err) {

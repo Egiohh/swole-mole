@@ -122,7 +122,63 @@ button, input, textarea { font: inherit; color: inherit; }
   font-size: 13px;
 }
 
+/* ---------- More tab ---------- */
+
+#more { padding: 0 12px 160px; }
+.rows { list-style: none; margin: 12px 0 0; padding: 0; }
+
+.segmented {
+  display: flex;
+  padding: 4px;
+  border-radius: 14px;
+  background: var(--surface);
+}
+.segmented button {
+  flex: 1;
+  min-height: 48px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: var(--muted);
+  font-weight: 600;
+}
+.segmented button.on { background: var(--surface-2); color: var(--accent); }
+
+.addff { display: flex; gap: 8px; }
+.addff input {
+  flex: 1;
+  min-width: 0;
+  height: var(--tap);
+  padding: 0 14px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--surface);
+}
+.addff button {
+  min-width: 80px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 700;
+}
+
+.remove {
+  margin-top: 20px;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px dashed var(--muted);
+  border-radius: 12px;
+  background: none;
+  color: var(--muted);
+}
+
 /* ---------- Day tab ---------- */
+
+.coach { margin-top: 4px; padding: 4px 14px; border-radius: 12px; background: var(--surface); }
+.coach summary { font-weight: 700; color: var(--accent); }
+.coach summary span { font-weight: 400; color: var(--muted); }
+.coach p { margin: 0 0 12px; white-space: pre-wrap; }
 
 #daytab { padding: 0 16px 160px; }
 #daytab .lbl:first-child { margin-top: 4px; }

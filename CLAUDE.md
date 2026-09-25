@@ -21,7 +21,8 @@ supersedes that spec.
 | `manifest.json`, `sw.js` | PWA install + offline cache. |
 | `data/exercises.json`, `data/program.json`, `data/venues.json` | Copies from the data project. **Read-only — never edit here.** |
 | `data/last.json` | Derived from the data project's `log.json`: most recent load/reps per exercise, numbers only. Prefill on a fresh install or after IndexedDB eviction. |
-| `tools/sync_data.py` | Re-copies the four data files. Run `python tools/sync_data.py` whenever the data project changes. |
+| `data/coaching.json` | Optional. Coaching notes from the data project, shown on the Day tab. |
+| `tools/sync_data.py` | Re-copies the data files (and `coaching.json` when present). Run `python tools/sync_data.py` whenever the data project changes. |
 | `icons/icon-source.png` | Original app icon (1254 px). `app-192.png` / `app-512.png` are resized from it. |
 | `icons/exercises/<exercise-id>.svg` | Per-exercise pictograms, named by exercise id. A missing file falls back to a neutral grey square. **House style** (keep every icon consistent): `viewBox="0 0 64 64"`; background `rect` rx 12 fill `#2a2a2a`; equipment strokes `#8c8c8c` width 4 (pads width 7); figure strokes `#fdbb1a` width 5; head a filled circle r 5.5; round caps and joins; no text, no gradients; side view unless front view reads better (e.g. pulldown). Must read at 48 px. |
 
@@ -63,10 +64,12 @@ any infrastructure work.
   expand-to-fullscreen entry, set-by-set commit, load/reps steppers, cues and
   cautions, completed-row greying, rest timer, IndexedDB persistence, "last
   time" prefill.
-- **v1 — export. ← BUILT, not yet field-tested.** Bottom tab bar (Today /
-  Day), the Day tab (mood chips, day note), share-to-Drive with the unexported
-  count. One file per session.
-- **v1.5 — tab 2.** "Not in program" / "At home" list, and `coaching.json`.
+- **v1 — export. ← BUILT, not yet field-tested.** Bottom tab bar, the Day tab
+  (mood chips, day note), share-to-Drive with the unexported count. One file
+  per session.
+- **v1.5 — tab 2. ← BUILT, not yet field-tested.** The More tab ("Not in
+  program" / "At home" / freeform), and coaching notes from `coaching.json`.
+  This completes the planned app.
 - **v2 — only if ever actually wanted.** Nothing planned. No speculative
   features. Charts, history and statistics are explicitly *not* wanted.
 
@@ -118,13 +121,15 @@ derived from the committed sets — never persist a "completed" field.**
 > wanted. Don't propose them. Foreground sound/vibration would be harmless but
 > isn't asked for.
 
-### Tab 2 — Everything else (v1.5)
+### Tab 2 — More (v1.5)
 
-Same list and fullscreen interaction. A segmented toggle *above* the list:
+Same rows and fullscreen interaction as tab 1, sorted by name. These items
+have no planned sets, so they never grey out, and RIR is asked after the first
+committed set. A segmented toggle *above* the list:
 
 | Toggle | Shows |
 |---|---|
-| **Not in program** | Library exercises not in tab 1 — how a movement outside the program gets logged, and how a trial is performed before adoption. |
+| **Not in program** | Library exercises not in tab 1 — how a movement outside the program gets logged, and how a trial is performed before adoption. (Ids referenced only by `program/suggested/` and absent from the library can't be logged — the app never invents an id.) |
 | **At home** | Exercises performable at home. |
 
 **"At home" is DERIVED**: `requires ⊆ venues.home.equipment`, from each
@@ -134,12 +139,15 @@ buying a pull-up bar must be one edit to `venues.json`. Show
 Home sessions are a sparse fallback, not a regime: no schedule, no streaks, no
 nagging. Anything logged from tab 2 goes into the same day object.
 
-A **freeform** entry also lives here: a text field for a movement with no
-library id (see data contract).
+A **freeform** entry sits at the bottom of both views: a text field + Add for
+a movement with no library id (see data contract). It opens straight into the
+fullscreen view (load in kg, reps); today's freeform entries are listed first.
+Internally keyed `ff-<timestamp>`; exported as `freeform` + `status:
+"trialing"`. One added by mistake can be removed while nothing is committed.
 
 ### Tab 3 — Day (v1)
 
-Navigation is a bottom tab bar: **Today** and **Day** (tab 2 joins in v1.5).
+Navigation is a bottom tab bar: **Today**, **More**, **Day**.
 The Day tab badge shows the number of unexported sessions.
 
 - **Mood chips** → the day's `state` array. Multi-select emoji chips (`MOODS`
@@ -150,9 +158,13 @@ The Day tab badge shows the number of unexported sessions.
 - **Export button**: "Share N sessions to Drive", listing the unexported dates
   (slightly nagging — the export is also the backup). Shares every pending day
   at once, one file each.
-- **Coaching notes** (v1.5): read-only text from `coaching.json` in this repo,
-  written by Claude in the data project. Same origin, cached for offline. The
-  app never writes it.
+- **Coaching notes** (v1.5), shown at the top when present: read-only text
+  from `data/coaching.json`, written by Claude in the data project as
+  `C:\Progetti\Gym\coaching.json` and copied by `tools/sync_data.py` (which
+  also removes it here when it's deleted there). Format:
+  `{ "updated": "YYYY-MM-DD", "text": "plain text, \n for line breaks" }`.
+  Missing file = no section. Same origin, cached by the service worker. The
+  app never writes it. **It is public once pushed** — see Risks.
 
 **Export mechanics** (`exportDays()` in `app.js`):
 - A day is *pending* while it has content and its current `toDay()` output

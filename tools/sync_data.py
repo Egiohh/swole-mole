@@ -1,7 +1,7 @@
 """Copy the bundled data files from the Gym data project into data/.
 
-Run after exercises.json, program/current.json, venues.json or log.json change
-in the data project:
+Run after exercises.json, program/current.json, venues.json, log.json or
+coaching.json change in the data project:
 
     python tools/sync_data.py
 
@@ -28,6 +28,19 @@ def main():
         json.loads(src.read_text(encoding="utf-8"))  # refuse to copy broken JSON
         shutil.copyfile(src, DATA / name)
         print(f"copied   {src} -> data/{name}")
+
+    # Optional: coaching notes written by Claude in the data project. Mirrored,
+    # so deleting them there removes them from the app. PUBLIC once pushed.
+    src, dst = GYM / "coaching.json", DATA / "coaching.json"
+    if src.exists():
+        coaching = json.loads(src.read_text(encoding="utf-8"))
+        if not isinstance(coaching.get("text"), str):
+            sys.exit("coaching.json needs a string 'text' field")
+        shutil.copyfile(src, dst)
+        print(f"copied   {src} -> data/coaching.json")
+    elif dst.exists():
+        dst.unlink()
+        print("removed  data/coaching.json (no longer in the data project)")
 
     # Most recent load / reps per exercise id, for "last time" prefill on a
     # fresh install or after IndexedDB has been evicted.
