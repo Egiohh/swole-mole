@@ -28,15 +28,16 @@ let moreView = 'other'; // tab 2 toggle: 'other' (not in program) | 'home'
 let resetArmedAt = 0; // reset needs a second tap within RESET_CONFIRM_MS
 const RESET_CONFIRM_MS = 5000;
 
-// UI language preference. Per-device convenience, so localStorage is fine;
-// nothing is translated yet.
-const LANGS = [['it', 'Italiano'], ['en', 'English']];
-function getLang() {
-  try { return localStorage.getItem('swolemole.lang') ?? 'en'; } catch { return 'en'; }
+// Settings are per-device conveniences, so localStorage is fine.
+function getPref(key, fallback) {
+  try { return localStorage.getItem('swolemole.' + key) ?? fallback; } catch { return fallback; }
 }
-function setLang(lang) {
-  try { localStorage.setItem('swolemole.lang', lang); } catch { /* private mode: keep the default */ }
+function setPref(key, value) {
+  try { localStorage.setItem('swolemole.' + key, value); } catch { /* private mode: keep the default */ }
 }
+const LANGS = [['it', 'Italiano'], ['en', 'English']]; // nothing is translated yet
+const getLang = () => getPref('lang', 'en');
+const timerOn = () => getPref('timer', 'on') === 'on';
 const tabScroll = {}; // window scroll per tab
 
 const $ = sel => document.querySelector(sel);
@@ -311,7 +312,7 @@ function renderRest() {
   const t = lastDoneAt();
   const el = $('#rest');
   const ms = Date.now() - t; // the timestamp is the truth; the interval only repaints
-  el.hidden = !t || ms > REST_HIDE_MS;
+  el.hidden = !timerOn() || !t || ms > REST_HIDE_MS;
   if (!el.hidden) el.textContent = `Rest ${Math.floor(ms / 60000)}:${pad(Math.floor(ms / 1000) % 60)}`;
 }
 
@@ -461,6 +462,10 @@ function renderSettings(msg = '') {
     <div class="segmented">${LANGS.map(([code, label]) =>
       `<button class="${getLang() === code ? 'on' : ''}" data-lang="${code}">${label}</button>`).join('')}</div>
     <p class="sub">Translations are not in yet — the app stays in English for now.</p>
+    <label class="lbl">Rest timer</label>
+    <div class="segmented">${[['on', 'On'], ['off', 'Off']].map(([v, label]) =>
+      `<button class="${getPref('timer', 'on') === v ? 'on' : ''}" data-timer="${v}">${label}</button>`).join('')}</div>
+    <p class="sub">The count-up shown after each set.</p>
     <label class="lbl">Today's session</label>
     <button class="danger${armed ? ' armed' : ''}" data-act="reset">${armed ? 'Tap again to erase today' : 'Reset today\'s session'}</button>
     <p class="sub">Erases everything logged today (${esc(fmtDate(day.date))}): sets, loads, notes, moods. Other days are untouched, and files already shared to Drive stay there.</p>
@@ -493,7 +498,8 @@ $('#settings').addEventListener('click', ev => {
   const b = ev.target.closest('button');
   if (!b) return;
   if (b.dataset.act === 'back') { history.back(); return; }
-  if (b.dataset.lang) { setLang(b.dataset.lang); renderSettings(); return; }
+  if (b.dataset.lang) { setPref('lang', b.dataset.lang); renderSettings(); return; }
+  if (b.dataset.timer) { setPref('timer', b.dataset.timer); renderSettings(); renderRest(); return; }
   if (b.dataset.act !== 'reset') return;
   if (Date.now() - resetArmedAt < RESET_CONFIRM_MS) {
     resetArmedAt = 0;

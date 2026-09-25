@@ -191,6 +191,9 @@ the place for future tests and controls.
 - **Language**: Italiano / English. Stored per device in `localStorage`
   (`swolemole.lang`, default `en`). **Nothing is translated yet** — it is only
   the stored preference.
+- **Rest timer**: On / Off (`swolemole.timer`, default `on`). Off only hides
+  the count-up; set timestamps are still recorded (the day-boundary rule uses
+  them).
 - **Reset today's session**: erases today's record (exercises, sets, loads,
   exercise notes, day note, moods, export snapshot). Other days are untouched;
   files already shared to Drive stay there. Destructive, so it takes a second
@@ -259,7 +262,8 @@ Rules:
 The data project's `log.json` is append-only and also edited on the PC; two
 writers through Drive would produce conflict copies and silent corruption. One
 uniquely named file per session makes conflicts impossible. The app shares to
-`SwoleMole-Inbox` in My Drive; getting it from there into the data project
+`SwoleMole-Inbox` in My Drive (confirmed working 2026-09-26; on the PC, Drive
+for desktop syncs it to `H:\Il mio Drive\SwoleMole-Inbox`); getting it from there into the data project
 (`C:\Progetti\Gym\log\inbox\`) and merging into `log.json` is the data
 project's job, not the app's. The data project folder is deliberately *not*
 inside Google Drive — don't redesign that.
