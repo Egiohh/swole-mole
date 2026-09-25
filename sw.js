@@ -1,9 +1,11 @@
-// Offline cache. Stale-while-revalidate: every request is answered from the
-// cache at once and refreshed in the background, so a deploy shows up on the
-// NEXT launch and never swaps code under a session in progress.
+// Offline cache. Network first, cache as fallback: with a connection every
+// launch gets the latest deploy; without one (or if the network takes longer
+// than NETWORK_TIMEOUT_MS) the cached copy is used. Code only loads when the
+// page opens, so a deploy never swaps code under a session in progress.
 // Bump VERSION only to throw the whole old cache away.
-const VERSION = 'v1';
+const VERSION = 'v2';
 const CACHE = 'swolemole-' + VERSION;
+const NETWORK_TIMEOUT_MS = 3000;
 const SHELL = [
   './', 'index.html', 'app.js', 'styles.css', 'manifest.json',
   'data/exercises.json', 'data/program.json', 'data/venues.json', 'data/last.json',
@@ -20,12 +22,29 @@ self.addEventListener('activate', e => {
     .then(() => self.clients.claim()));
 });
 
+// After a timeout, treat the network as dead for a while and answer from the
+// cache at once - otherwise page, scripts and data would each wait out the
+// timeout in turn on a connected-but-dead gym network.
+const DEAD_NETWORK_MS = 30000;
+let networkDeadUntil = 0;
+
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET' || new URL(e.request.url).origin !== location.origin) return;
-  const fresh = caches.open(CACHE).then(cache => fetch(e.request).then(r => {
-    if (r.ok) cache.put(e.request, r.clone());
+  // cache: 'no-cache' revalidates with the server instead of trusting the
+  // browser's HTTP cache (GitHub Pages allows 10 minutes of staleness).
+  const network = fetch(e.request, { cache: 'no-cache' }).then(async r => {
+    if (r.ok) await (await caches.open(CACHE)).put(e.request, r.clone());
     return r;
-  }));
-  e.waitUntil(fresh.catch(() => {}));
-  e.respondWith(caches.match(e.request, { ignoreSearch: true }).then(hit => hit || fresh));
+  });
+  e.waitUntil(network.catch(() => {})); // finish updating the cache even after a timeout
+  e.respondWith((async () => {
+    if (Date.now() > networkDeadUntil) {
+      const timeout = new Promise(ok => setTimeout(ok, NETWORK_TIMEOUT_MS, null));
+      const fresh = await Promise.race([network.catch(() => null), timeout]);
+      if (fresh) return fresh;
+      networkDeadUntil = Date.now() + DEAD_NETWORK_MS;
+    }
+    const cached = await caches.match(e.request, { ignoreSearch: true });
+    return cached ?? network; // nothing cached: keep waiting for the network
+  })());
 });

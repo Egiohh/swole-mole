@@ -24,7 +24,7 @@ supersedes that spec.
 | `data/coaching.json` | Optional. Coaching notes from the data project, shown on the Day tab. |
 | `tools/sync_data.py` | Re-copies the data files (and `coaching.json` when present). Run `python tools/sync_data.py` whenever the data project changes. |
 | `icons/icon-source.png` | Original app icon (1254 px). `app-192.png` / `app-512.png` are resized from it. |
-| `icons/exercises/<exercise-id>.svg` | Per-exercise pictograms, named by exercise id. A missing file falls back to a neutral grey square. **House style** (keep every icon consistent): `viewBox="0 0 64 64"`; background `rect` rx 12 fill `#2a2a2a`; equipment strokes `#8c8c8c` width 4 (pads width 7); figure strokes `#fdbb1a` width 5; head a filled circle r 5.5; round caps and joins; no text, no gradients; side view unless front view reads better (e.g. pulldown). Must read at 48 px. |
+| `icons/exercises/<exercise-id>.svg` | Per-exercise pictograms, named by exercise id. A missing file falls back to a neutral grey square. **House style** (keep every icon consistent): `viewBox="0 0 64 64"`; background `rect` rx 12 fill `#2a2a2a`; equipment strokes `#8c8c8c` width 4 (pads width 7); figure strokes `#fdbb1a` width 5; head a filled circle r 5.5; round caps and joins; no text, no gradients; side view unless front view reads better (e.g. pulldown). Must read at 48 px. Always draw the figure amber: exercises doable at home are tinted blue **at render time** (`.ico.home` → CSS `hue-rotate`, from the derived `isHome()`), never in the file. |
 
 ## Deploy
 
@@ -267,10 +267,18 @@ Phone held one-handed, sometimes damp, between sets, by someone tired.
 - **Day boundary:** the day key is the local date. If the app is reopened after
   midnight, it stays on the previous day while a set was committed within the last
   3 h (a session crossing midnight), otherwise it switches to the new day.
-- **Service worker:** stale-while-revalidate for every same-origin GET. A deploy
-  reaches the phone on the *next* launch, never mid-session. `VERSION` in
-  `sw.js` only needs bumping to throw the whole cache away. After a deploy,
-  opening the app twice picks up the new version.
+- **Service worker:** network first with a 3 s timeout, cache as fallback, for
+  every same-origin GET (fetched with `cache: 'no-cache'` so GitHub Pages' 10
+  min HTTP caching can't serve a stale copy). With a connection, one launch
+  picks up a deploy; code only loads at page open, so nothing changes
+  mid-session. After one timeout the network is treated as dead for 30 s and
+  everything is served from the cache at once (a connected-but-dead gym
+  network would otherwise cost 3 s per loading stage). Files that may be
+  absent (`coaching.json`) are never cached, so they are fetched *after* the
+  first render and must never block startup. `VERSION` in `sw.js` only needs
+  bumping to throw the whole cache away.
+- **Never tell the owner to "clear site data"** to force an update: it also
+  deletes IndexedDB, i.e. every unexported session.
 
 ## Explicit non-goals
 

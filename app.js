@@ -165,10 +165,18 @@ function loadText(id, load) {
   return load == null ? '' : `${load} ${loadType(id) === 'time-seconds' ? 's' : 'kg'}`;
 }
 
+// "Can be done at home" is derived: everything the exercise requires is in
+// venues.home.equipment. Never store it on the exercise.
+function isHome(id) {
+  const home = venues?.home?.equipment ?? [];
+  return !!exercises[id]?.requires.every(r => home.includes(r));
+}
+
 function icon(id) {
   // The grey square is the neutral fallback; the image covers it when it exists.
+  // Home-doable exercises are tinted blue by CSS, so the colour follows venues.json.
   if (isFreeform(id)) return '<div class="ico"></div>';
-  return `<div class="ico"><img src="icons/exercises/${id}.svg" alt="" onerror="this.remove()"></div>`;
+  return `<div class="ico${isHome(id) ? ' home' : ''}"><img src="icons/exercises/${id}.svg" alt="" onerror="this.remove()"></div>`;
 }
 
 function rowHtml(item) {
@@ -200,14 +208,12 @@ function renderList() {
     || '<li class="empty">The program is empty. Run tools/sync_data.py.</li>';
 }
 
-// Tab 2. "At home" is derived: an exercise qualifies when everything it
-// requires is in venues.home.equipment. Never store it on the exercise.
+// Tab 2: library exercises not in the program, or those doable at home.
 function renderMore() {
   const inProgram = new Set(program.map(p => p.exercise));
-  const home = new Set(venues?.home?.equipment ?? []);
   const lib = Object.values(exercises).sort((a, b) => a.id.localeCompare(b.id));
   const pick = moreView === 'home'
-    ? lib.filter(x => x.requires.every(r => home.has(r)))
+    ? lib.filter(x => isHome(x.id))
     : lib.filter(x => !inProgram.has(x.id));
   const freeform = Object.keys(day.ex).filter(isFreeform).map(id => ({ exercise: id }));
   const toggle = [['other', 'Not in program'], ['home', 'At home']].map(([v, label]) =>
@@ -534,16 +540,17 @@ async function start() {
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
   try {
     const get = url => fetch(url).then(r => { if (!r.ok) throw new Error(`${url}: ${r.status}`); return r.json(); });
-    const optional = url => get(url).catch(() => null); // missing file = feature hidden
-    const [lib, prog, lastJson, ven, coach] = await Promise.all([get('data/exercises.json'), get('data/program.json'),
-      get('data/last.json'), optional('data/venues.json'), optional('data/coaching.json')]);
+    const [lib, prog, lastJson, ven] = await Promise.all([get('data/exercises.json'), get('data/program.json'),
+      get('data/last.json'), get('data/venues.json')]);
     lib.exercises.forEach(e => { exercises[e.id] = e; });
     program = prog.blocks.flatMap(b => b.items); // one flat list, whatever the blocks
     bundledLast = lastJson;
-    venues = ven?.venues ?? null;
-    coaching = coach;
+    venues = ven.venues;
     await loadDay();
     setInterval(renderRest, 1000);
+    // Optional and possibly absent, so never cached: fetched after the first
+    // render, or a dead gym network would hold up the whole start waiting for it.
+    get('data/coaching.json').then(c => { coaching = c; renderDayTab(); }).catch(() => {});
   } catch (err) {
     $('#list').innerHTML = `<li class="empty">Could not start: ${esc(err.message)}</li>`;
   }

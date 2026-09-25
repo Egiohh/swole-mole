@@ -83,6 +83,7 @@ button, input, textarea { font: inherit; color: inherit; }
   overflow: hidden;
 }
 .ico img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ico.home img { filter: hue-rotate(170deg); } /* amber figure -> blue: doable at home */
 
 .empty { padding: 24px 12px; color: var(--muted); }
 
