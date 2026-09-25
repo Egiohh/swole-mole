@@ -25,6 +25,18 @@ let coaching = null;  // data/coaching.json { updated, text }, or null when abse
 let openId = null;    // exercise shown fullscreen, or null
 let tab = 'today';    // 'today' | 'more' | 'day'
 let moreView = 'other'; // tab 2 toggle: 'other' (not in program) | 'home'
+let resetArmedAt = 0; // reset needs a second tap within RESET_CONFIRM_MS
+const RESET_CONFIRM_MS = 5000;
+
+// UI language preference. Per-device convenience, so localStorage is fine;
+// nothing is translated yet.
+const LANGS = [['it', 'Italiano'], ['en', 'English']];
+function getLang() {
+  try { return localStorage.getItem('swolemole.lang') ?? 'en'; } catch { return 'en'; }
+}
+function setLang(lang) {
+  try { localStorage.setItem('swolemole.lang', lang); } catch { /* private mode: keep the default */ }
+}
 const tabScroll = {}; // window scroll per tab
 
 const $ = sel => document.querySelector(sel);
@@ -418,7 +430,68 @@ function closeDetail() {
   renderMore();
 }
 
-window.addEventListener('popstate', () => { if (openId) closeDetail(); });
+// ---------- Settings (fullscreen, like the detail view) ----------
+
+function renderSettings(msg = '') {
+  const armed = Date.now() - resetArmedAt < RESET_CONFIRM_MS;
+  $('#settings').innerHTML = `
+    <header class="bar">
+      <button class="back" data-act="back" aria-label="Back"><span>‹</span></button>
+      <h2>Settings</h2>
+    </header>
+    <label class="lbl">Language</label>
+    <div class="segmented">${LANGS.map(([code, label]) =>
+      `<button class="${getLang() === code ? 'on' : ''}" data-lang="${code}">${label}</button>`).join('')}</div>
+    <p class="sub">Translations are not in yet — the app stays in English for now.</p>
+    <label class="lbl">Today's session</label>
+    <button class="danger${armed ? ' armed' : ''}" data-act="reset">${armed ? 'Tap again to erase today' : 'Reset today\'s session'}</button>
+    <p class="sub">Erases everything logged today (${esc(fmtDate(day.date))}): sets, loads, notes, moods. Other days are untouched, and files already shared to Drive stay there.</p>
+    ${msg ? `<p class="msg">${esc(msg)}</p>` : ''}`;
+}
+
+function openSettings() {
+  history.pushState({ settings: true }, '');
+  resetArmedAt = 0;
+  renderSettings();
+  $('#settings').hidden = false;
+}
+
+function closeSettings() {
+  $('#settings').hidden = true;
+}
+
+function resetToday() {
+  day.ex = {};
+  day.note = '';
+  day.state = [];
+  delete day.exported;
+  save();
+  render();
+}
+
+$('#gear').addEventListener('click', openSettings);
+
+$('#settings').addEventListener('click', ev => {
+  const b = ev.target.closest('button');
+  if (!b) return;
+  if (b.dataset.act === 'back') { history.back(); return; }
+  if (b.dataset.lang) { setLang(b.dataset.lang); renderSettings(); return; }
+  if (b.dataset.act !== 'reset') return;
+  if (Date.now() - resetArmedAt < RESET_CONFIRM_MS) {
+    resetArmedAt = 0;
+    resetToday();
+    renderSettings("Today's session was reset.");
+  } else {
+    resetArmedAt = Date.now();
+    renderSettings();
+    setTimeout(() => { if (resetArmedAt && !$('#settings').hidden) renderSettings(); }, RESET_CONFIRM_MS); // disarm visibly
+  }
+});
+
+window.addEventListener('popstate', () => {
+  if (openId) closeDetail();
+  else if (!$('#settings').hidden) closeSettings();
+});
 
 // ---------- Events ----------
 

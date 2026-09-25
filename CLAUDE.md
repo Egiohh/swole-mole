@@ -180,6 +180,19 @@ The Day tab badge shows the number of unexported sessions.
   exported only when `navigator.share` resolves (a target was chosen) or the
   clipboard write succeeded.
 
+### Settings (⚙️, header top-right)
+
+A fullscreen page like the exercise view (back swipe or `‹` closes it), and
+the place for future tests and controls.
+
+- **Language**: Italiano / English. Stored per device in `localStorage`
+  (`swolemole.lang`, default `en`). **Nothing is translated yet** — it is only
+  the stored preference.
+- **Reset today's session**: erases today's record (exercises, sets, loads,
+  exercise notes, day note, moods, export snapshot). Other days are untouched;
+  files already shared to Drive stay there. Destructive, so it takes a second
+  tap within 5 s on the button itself (no dialog); the arming expires visibly.
+
 ## Data contract
 
 The app is a producer for the data project's log format. Everything downstream

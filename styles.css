@@ -53,6 +53,14 @@ button, input, textarea { font: inherit; color: inherit; }
 }
 .top img { width: 36px; height: 36px; border-radius: 8px; }
 .top h1 { font-size: 20px; margin: 0; flex: 1; }
+#gear {
+  width: 48px;
+  height: 48px;
+  margin-right: -8px;
+  border: 0;
+  background: none;
+  font-size: 24px;
+}
 
 #list {
   list-style: none;
@@ -213,6 +221,30 @@ button, input, textarea { font: inherit; color: inherit; }
 .nag { margin: 12px 0 4px; color: var(--accent); font-weight: 600; }
 .msg { color: var(--warn-text); }
 #export > .sub:only-child { margin-top: 28px; }
+
+/* ---------- Settings ---------- */
+
+#settings {
+  position: fixed;
+  inset: 0;
+  overflow-y: auto;
+  background: var(--bg);
+  padding: 0 16px 40px;
+  z-index: 3;
+}
+#settings .back { min-width: var(--tap); font-size: 32px; }
+
+.danger {
+  width: 100%;
+  min-height: var(--tap);
+  border: 2px solid #d9534f;
+  border-radius: 14px;
+  background: none;
+  color: #e5675f;
+  font-size: 17px;
+  font-weight: 700;
+}
+.danger.armed { background: #d9534f; color: #fff; }
 
 /* ---------- Detail (fullscreen over the list, so list scroll is kept) ---------- */
 
