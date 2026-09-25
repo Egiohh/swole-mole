@@ -44,7 +44,7 @@ a specific failure mode.
 |---|---|
 | **Vanilla JavaScript. No TypeScript.** | The owner dislikes TS and will not maintain it. |
 | **No build step, no npm, no bundler, no framework.** | `node_modules`, Vite configs and dependency drift are what kill this owner's side projects. Open the file, it runs. |
-| **Small, legible code — well under ~500 lines of JS.** | The owner won't read it daily but must be *able* to fix a typo mid-session. Optimise for someone squinting at a phone, not for abstraction. |
+| **Legible code. No line or size budget** (lifted by the owner 2026-09-25); the only limits are GitHub's and the browser's. | The owner won't read it daily but must be *able* to fix a typo mid-session. Optimise for someone squinting at a phone, not for abstraction. |
 | **PWA, installed to the Android home screen.** | Own launcher icon, own task-switcher entry, works offline. `display: standalone` (status bar and clock stay visible). |
 | **Hosted on GitHub Pages.** | Free HTTPS, all a PWA needs. No backend. All paths are relative so it works under a `/repo-name/` subpath. |
 | **Data in IndexedDB on the device.** | Never transmitted. No server ever sees a session. |
