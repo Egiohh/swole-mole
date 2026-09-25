@@ -219,6 +219,15 @@ button, input, textarea { font: inherit; color: inherit; }
   font-weight: 700;
 }
 .nag { margin: 12px 0 4px; color: var(--accent); font-weight: 600; }
+.copy {
+  width: 100%;
+  min-height: var(--tap);
+  border: 2px solid var(--accent);
+  border-radius: 14px;
+  background: none;
+  color: var(--accent);
+  font-weight: 700;
+}
 .msg { color: var(--warn-text); }
 #export > .sub:only-child { margin-top: 28px; }
 

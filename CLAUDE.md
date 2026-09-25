@@ -172,10 +172,13 @@ The Day tab badge shows the number of unexported sessions.
   last shared. Editing an exported day makes it pending again; re-sharing
   produces a second file for the same date, and the merge step in the data
   project must take the newest.
-- **Chrome on Android only shares an allow-list of file types, and `.json` is
-  not on it.** The app offers `YYYY-MM-DD.json` first, then `YYYY-MM-DD.txt`
-  (text/plain, identical JSON content), then falls back to copying the JSON to
-  the clipboard. In practice files arrive in Drive as `.txt`.
+- **Files are always shared as `YYYY-MM-DD.txt` (text/plain, JSON inside).**
+  Chrome on Android refuses `.json`, and its `canShare()` pre-check says yes
+  anyway — `share()` then fails with `NotAllowedError: Permission denied`
+  (seen in the field, 2026-09-26). Never reintroduce a `.json` attempt.
+- If sharing is unavailable or fails for any reason other than dismissal, the
+  error is shown with a **"Copy to clipboard instead"** button (a fresh tap,
+  so the clipboard write is allowed): one day object, or an array for several.
 - Dismissing the share sheet (AbortError) changes nothing. A day is marked
   exported only when `navigator.share` resolves (a target was chosen) or the
   clipboard write succeeded.
@@ -215,8 +218,8 @@ machines), dumbbell 1 kg, added weight 2.5 kg, time 5 s.
 
 ### Output
 
-One file per session, `YYYY-MM-DD.json` (in practice `.txt` on Android — see
-"Export mechanics"), a single **day** object:
+One file per session, `YYYY-MM-DD.txt` (JSON content; see "Export
+mechanics"), a single **day** object:
 
 ```json
 {

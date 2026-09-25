@@ -350,7 +350,7 @@ function pendingDays() {
     .sort((a, b) => b.date.localeCompare(a.date));
 }
 
-function renderExport(msg = '') {
+function renderExport(msg = '', offerCopy = false) {
   const pending = pendingDays();
   const badge = $('#badge');
   badge.hidden = !pending.length;
@@ -363,34 +363,52 @@ function renderExport(msg = '') {
     <p class="sub">Pick Drive, then the SwoleMole-Inbox folder. The export is also your backup.</p>`
     : '<p class="sub">All sessions exported ✓</p>';
   if (msg) el.insertAdjacentHTML('beforeend', `<p class="msg">${esc(msg)}</p>`);
+  if (offerCopy && pending.length) el.insertAdjacentHTML('beforeend', '<button class="copy" data-act="copy">Copy to clipboard instead</button>');
 }
 
-// Chrome on Android only shares an allow-list of file types and .json is not on
-// it, so fall back to .txt (same JSON inside), then to the clipboard.
-async function exportDays() {
-  const list = pendingDays();
-  if (!list.length) return;
-  const files = ext => list.map(d => new File([JSON.stringify(toDay(d), null, 2) + '\n'], `${d.date}.${ext}`,
-    { type: ext === 'json' ? 'application/json' : 'text/plain' }));
-  let msg = '';
-  try {
-    const share = [files('json'), files('txt')].find(f => navigator.canShare?.({ files: f }));
-    if (share) {
-      await navigator.share({ files: share });
-    } else {
-      const out = list.map(toDay);
-      await navigator.clipboard.writeText(JSON.stringify(out.length === 1 ? out[0] : out, null, 2));
-      msg = 'Sharing files is not available here, so the JSON was copied to the clipboard.';
-    }
-  } catch (err) {
-    if (err.name !== 'AbortError') renderExport('Export failed: ' + err.message); // AbortError = share sheet dismissed
-    return;
-  }
+async function markExported(list) {
   for (const d of list) {
     d.exported = JSON.stringify(toDay(d));
     await save(d);
   }
-  renderExport(msg);
+}
+
+// Clipboard route: one JSON day object, or an array of them for several days.
+async function copyDays() {
+  const list = pendingDays();
+  if (!list.length) return;
+  const out = list.map(toDay);
+  try {
+    await navigator.clipboard.writeText(JSON.stringify(out.length === 1 ? out[0] : out, null, 2));
+  } catch (err) {
+    renderExport('Copy failed too: ' + err.message);
+    return;
+  }
+  await markExported(list);
+  renderExport(`Copied ${list.length} session${list.length > 1 ? 's' : ''} to the clipboard — paste it into a file in SwoleMole-Inbox.`);
+}
+
+// Always .txt: Chrome on Android refuses to share .json, and its canShare()
+// pre-check says yes anyway - share() then fails with "Permission denied".
+// text/plain is on the allow-list; the content is the same JSON.
+async function exportDays() {
+  const list = pendingDays();
+  if (!list.length) return;
+  const files = list.map(d => new File([JSON.stringify(toDay(d), null, 2) + '\n'], `${d.date}.txt`, { type: 'text/plain' }));
+  if (!navigator.canShare?.({ files })) {
+    renderExport('Sharing files is not available in this browser.', true);
+    return;
+  }
+  try {
+    await navigator.share({ files });
+  } catch (err) {
+    // AbortError = share sheet dismissed, nothing to report. Anything else: say
+    // what happened and offer the clipboard (a fresh tap, so it is allowed).
+    if (err.name !== 'AbortError') renderExport(`Export failed: ${err.name}: ${err.message}`, true);
+    return;
+  }
+  await markExported(list);
+  renderExport();
 }
 
 function showTab(name) {
@@ -573,6 +591,7 @@ $('#daytab').addEventListener('click', ev => {
   const b = ev.target.closest('button');
   if (!b) return;
   if (b.dataset.act === 'export') { exportDays(); return; }
+  if (b.dataset.act === 'copy') { copyDays(); return; }
   const tag = b.dataset.mood;
   if (!tag) return;
   day.state = day.state.includes(tag) ? day.state.filter(t => t !== tag) : [...day.state, tag];
