@@ -127,7 +127,7 @@ function loadText(id, load) {
 
 function icon(id) {
   // The grey square is the neutral fallback; the image covers it when it exists.
-  return `<div class="ico"><img src="icons/exercises/${id}.png" alt="" onerror="this.remove()"></div>`;
+  return `<div class="ico"><img src="icons/exercises/${id}.svg" alt="" onerror="this.remove()"></div>`;
 }
 
 function renderList() {

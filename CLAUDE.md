@@ -23,7 +23,7 @@ supersedes that spec.
 | `data/last.json` | Derived from the data project's `log.json`: most recent load/reps per exercise, numbers only. Prefill on a fresh install or after IndexedDB eviction. |
 | `tools/sync_data.py` | Re-copies the four data files. Run `python tools/sync_data.py` whenever the data project changes. |
 | `icons/icon-source.png` | Original app icon (1254 px). `app-192.png` / `app-512.png` are resized from it. |
-| `icons/exercises/<exercise-id>.png` | Per-exercise icons, supplied by the owner. Square, ~256 px, named by exercise id. A missing file falls back to a neutral grey square — never generate placeholder art. |
+| `icons/exercises/<exercise-id>.svg` | Per-exercise pictograms, named by exercise id. A missing file falls back to a neutral grey square. **House style** (keep every icon consistent): `viewBox="0 0 64 64"`; background `rect` rx 12 fill `#2a2a2a`; equipment strokes `#8c8c8c` width 4 (pads width 7); figure strokes `#fdbb1a` width 5; head a filled circle r 5.5; round caps and joins; no text, no gradients; side view unless front view reads better (e.g. pulldown). Must read at 48 px. |
 
 ## Deploy
 
@@ -250,8 +250,6 @@ beyond the library's `cues`; no editing the library or program from the app.
 
 ## Open questions
 
-- Exercise icons: convention proposed above (`icons/exercises/<id>.png`,
-  square, ~256 px) — confirm with the owner when the first ones arrive.
 - A read-only "Program" view was considered and deferred.
 
 ## Working with the owner
