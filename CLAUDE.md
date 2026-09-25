@@ -82,9 +82,15 @@ Tapping a row expands it to fullscreen:
 
 - Load with `−` / `+` beside it; unit label from the exercise's `load_type`.
   Hidden for `bodyweight`.
-- One row per prescribed set: reps field with `−` / `+`, and a **done** flag.
-  `+ set` adds an extra set; fewer sets is simply not flagging them.
-- RIR chips (0–4) for the last set, optional.
+- **Sets are committed one at a time.** Only the set being worked on has
+  controls: one row with a reps stepper and a ✓. Tapping ✓ commits it (starts
+  the rest timer) and it collapses to a read-only line, "✓ Set 1 · 13 reps";
+  the row moves on to the next set, prefilled from last session's same set (or
+  the set just done). No limit on sets, so no "+ set"; fewer sets is simply not
+  committing more. Only the most recent committed set has an **undo** (for a
+  fat-fingered commit); older ones are final.
+- RIR ("reps left in the tank on the last set?", chips 0–4+) appears only once
+  the planned sets are committed. Optional.
 - `cues`, `rom_notes` and `cautions`. **Some are safety-relevant**:
   `roman-chair-back-extension` carries a standing low-blood-pressure
   instruction (pause on the handles before standing). Cautions are styled to be
@@ -93,10 +99,10 @@ Tapping a row expands it to fullscreen:
 - Back (button or Android back gesture) returns to the list at the same scroll
   position.
 
-A row goes grey when every set is flagged done. **Completion is derived from
-the flags — never persist a "completed" field.**
+A row goes grey once the planned number of sets is committed. **Completion is
+derived from the committed sets — never persist a "completed" field.**
 
-**Rest timer.** Flagging a set done shows a count-up of elapsed rest.
+**Rest timer.** Committing a set shows a count-up of elapsed rest.
 
 > A web app only runs while its page is showing. So: store the timestamp of the
 > last done flag and compute `Date.now() - timestamp` on every repaint and on
@@ -181,9 +187,10 @@ Rules:
 
 - Only `date` is required on a day; only `exercise` **or** `freeform` on an
   entry. A day with just a note is valid and must be exportable.
-- Only sets flagged done are exported; `sets` is their count, `reps` their
-  values in order, `null` for a set that wasn't counted. An exercise with no
-  done sets and no note was not performed and is omitted.
+- Only committed sets are exported; `sets` is their count, `reps` their
+  values in order, `null` for a set committed with an empty reps field. An
+  exercise with no committed sets and no note was not performed and is
+  omitted.
 - `freeform` (plain string) + `status: "trialing"` for a movement with no
   library id — promoted to a real entry later, by hand, in the data project.
   **This escape hatch matters**: without it he'd have to stop mid-session to
@@ -218,13 +225,12 @@ Phone held one-handed, sometimes damp, between sets, by someone tired.
 - `navigator.storage.persist()` on start.
 - Works with no network.
 - Dark by default, light via `prefers-color-scheme`.
-- No confirmation dialogs for ordinary actions; tapping a done flag again
-  un-flags it.
+- No confirmation dialogs for ordinary actions.
 
 ## Behaviour worth knowing
 
 - **Day boundary:** the day key is the local date. If the app is reopened after
-  midnight, it stays on the previous day while a set was flagged within the last
+  midnight, it stays on the previous day while a set was committed within the last
   3 h (a session crossing midnight), otherwise it switches to the new day.
 - **Service worker:** stale-while-revalidate for every same-origin GET. A deploy
   reaches the phone on the *next* launch, never mid-session. `VERSION` in

@@ -58,7 +58,7 @@ async function save() {
 
 // ---------- Day record -> log.schema.json "day" object ----------
 
-// Only sets flagged done are exported. An exercise with nothing done and no
+// Only committed sets are exported. An exercise with nothing committed and no
 // note was not performed and is left out.
 function toDay(rec) {
   const out = { date: rec.date };
@@ -66,13 +66,12 @@ function toDay(rec) {
   if (rec.state?.length) out.state = rec.state;
   const list = [];
   for (const [id, e] of Object.entries(rec.ex)) {
-    const doneSets = e.done.map((t, i) => (t ? i : -1)).filter(i => i >= 0);
-    if (!doneSets.length && !e.note) continue;
+    if (!e.sets.length && !e.note) continue;
     const p = { exercise: id };
     if (hasLoad(id) && e.load != null) p.load = e.load;
-    if (doneSets.length) {
-      p.sets = doneSets.length;
-      if (hasReps(id)) p.reps = doneSets.map(i => e.reps[i] ?? null);
+    if (e.sets.length) {
+      p.sets = e.sets.length;
+      if (hasReps(id)) p.reps = e.sets.map(s => s.reps);
     }
     if (e.rir != null) p.rir = e.rir;
     if (e.note) p.note = e.note;
@@ -91,31 +90,41 @@ function buildLast(pastDays) {
   }
 }
 
+// An exercise entry: { load, sets: [{ reps, at }] (committed, in order),
+// next: reps for the set being worked on, rir, note }.
+
+// Reps to offer for set number i (0-based): last session's same set, else the
+// set just committed.
+function prefillReps(id, i) {
+  return last[id]?.reps?.[i] ?? day.ex[id]?.sets.at(-1)?.reps ?? null;
+}
+
 // Today's entry for an exercise, prefilled from last time on first touch.
 function entry(item) {
   const id = item.exercise;
-  if (!day.ex[id]) {
-    const prev = last[id] ?? {};
-    const sets = item.sets ?? prev.reps?.length ?? 3;
-    day.ex[id] = {
-      load: prev.load ?? null,
-      reps: Array.from({ length: sets }, (_, i) => prev.reps?.[i] ?? null),
-      done: Array(sets).fill(null),
-      rir: null,
-      note: '',
-    };
-  }
+  day.ex[id] ??= { load: last[id]?.load ?? null, sets: [], next: prefillReps(id, 0), rir: null, note: '' };
   return day.ex[id];
 }
 
-// Completion is derived from the set flags, never stored.
-function isComplete(id) {
-  const e = day.ex[id];
-  return !!e && e.done.length > 0 && e.done.every(Boolean);
+// Records saved before sets became a commit list had parallel reps/done arrays.
+function upgrade(rec) {
+  for (const e of Object.values(rec.ex)) {
+    if (!e.done) continue;
+    e.sets = e.done.flatMap((at, i) => (at ? [{ reps: e.reps[i] ?? null, at }] : []));
+    e.next = null;
+    delete e.done;
+    delete e.reps;
+  }
+  return rec;
+}
+
+// Completion is derived from the committed sets, never stored.
+function isComplete(item) {
+  return (day.ex[item.exercise]?.sets.length ?? 0) >= (item.sets ?? 1);
 }
 
 function lastDoneAt() {
-  return Math.max(0, ...Object.values(day.ex).flatMap(e => e.done.filter(Boolean)));
+  return Math.max(0, ...Object.values(day.ex).flatMap(e => e.sets.map(s => s.at)));
 }
 
 // ---------- Rendering ----------
@@ -135,27 +144,27 @@ function renderList() {
     const id = item.exercise;
     const e = day.ex[id];
     let sub;
-    if (e && e.done.some(Boolean)) {
-      sub = `today: ${e.done.filter(Boolean).length}/${e.done.length} sets · ${loadText(id, e.load)}`;
+    if (e?.sets.length) {
+      sub = `today: ${e.sets.length}/${item.sets ?? '?'} sets · ${loadText(id, e.load)}`;
     } else if (last[id]) {
       const reps = last[id].reps?.map(r => r ?? '?').join(' ');
       sub = `last: ${loadText(id, last[id].load)}${reps ? ' · ' + reps : ''}`;
     } else {
       sub = 'no history yet';
     }
-    return `<li class="row${isComplete(id) ? ' complete' : ''}" data-id="${esc(id)}">
+    return `<li class="row${isComplete(item) ? ' complete' : ''}" data-id="${esc(id)}">
       ${icon(esc(id))}
       <div><div class="name">${esc(name(id))}</div><div class="sub">${esc(sub)}</div></div>
     </li>`;
   }).join('') || '<li class="empty">The program is empty. Run tools/sync_data.py.</li>';
 }
 
-function stepper(field, value, i = '') {
+function stepper(field, value) {
   const mode = field === 'reps' ? 'numeric' : 'decimal';
   return `<div class="stepper">
-    <button data-act="dec" data-field="${field}" data-i="${i}">−</button>
-    <input inputmode="${mode}" data-field="${field}" data-i="${i}" value="${value ?? ''}">
-    <button data-act="inc" data-field="${field}" data-i="${i}">+</button>
+    <button data-act="dec" data-field="${field}">−</button>
+    <input inputmode="${mode}" data-field="${field}" value="${value ?? ''}">
+    <button data-act="inc" data-field="${field}">+</button>
   </div>`;
 }
 
@@ -171,15 +180,26 @@ function renderDetail() {
   const range = item.rep_range ? `${item.rep_range[0]}–${item.rep_range[1]} ${hasReps(id) ? 'reps' : 's'}` : '';
   const target = [item.sets && `${item.sets} sets`, range, item.per_side && 'per side, weak side first'].filter(Boolean).join(' · ');
 
-  const sets = e.done.map((t, i) => `
-    <div class="set${t ? ' done' : ''}">
-      <span class="setno">${i + 1}</span>
-      ${hasReps(id) ? stepper('reps', e.reps[i], i) : '<span class="grow"></span>'}
-      <button class="tick" data-act="done" data-i="${i}" aria-label="Set ${i + 1} done">✓</button>
+  // Committed sets are read-only one-liners; only the latest can be undone.
+  const done = e.sets.map((s, i) => `
+    <div class="doneset">✓ Set ${i + 1}${hasReps(id) ? ` · ${s.reps ?? '?'} reps` : ''}
+      ${i === e.sets.length - 1 ? '<button class="undo" data-act="undo">undo</button>' : ''}
     </div>`).join('');
 
-  const rir = [0, 1, 2, 3, 4].map(n =>
-    `<button class="chip${e.rir === n ? ' on' : ''}" data-act="rir" data-n="${n}">${n}</button>`).join('');
+  // Only the set being worked on has controls. Committing it reveals the next.
+  const n = e.sets.length + 1;
+  const active = `
+    <div class="set">
+      <span class="setno">${n}</span>
+      ${hasReps(id) ? stepper('reps', e.next) : '<span class="grow"></span>'}
+      <button class="tick" data-act="commit" aria-label="Set ${n} done">✓</button>
+    </div>`;
+
+  // Reps in reserve: asked once the planned sets are done, in plain words.
+  const rir = isComplete(item) ? `
+    <label class="lbl">Reps left in the tank on the last set?</label>
+    <div class="chips">${[0, 1, 2, 3, 4].map(r =>
+      `<button class="chip${e.rir === r ? ' on' : ''}" data-act="rir" data-n="${r}">${r === 4 ? '4+' : r}</button>`).join('')}</div>` : '';
 
   const detail = $('#detail');
   const scroll = detail.scrollTop;
@@ -192,10 +212,8 @@ function renderDetail() {
     ${item.note ? `<p class="sub">${esc(item.note)}</p>` : ''}
     ${hasLoad(id) ? `<label class="lbl">Load <span>${UNIT[loadType(id)]}</span></label>${stepper('load', e.load)}` : '<p class="lbl">Bodyweight</p>'}
     <label class="lbl">Sets</label>
-    <div class="sets">${sets}</div>
-    <button class="addset" data-act="addset">+ set</button>
-    <label class="lbl">RIR on the last set</label>
-    <div class="chips">${rir}</div>
+    <div class="sets">${done}${active}</div>
+    ${rir}
     ${bullets(ex.cues, 'cues')}
     ${bullets(ex.rom_notes, 'rom')}
     ${bullets(ex.cautions, 'cautions')}
@@ -212,7 +230,6 @@ function renderRest() {
 }
 
 function render() {
-  $('#date').textContent = new Date(day.date + 'T12:00').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
   renderList();
   if (openId) renderDetail();
   renderRest();
@@ -247,18 +264,20 @@ $('#detail').addEventListener('click', ev => {
   const b = ev.target.closest('button');
   if (!b) return;
   const e = day.ex[openId];
-  const i = Number(b.dataset.i);
   switch (b.dataset.act) {
     case 'back': history.back(); return;
-    case 'done': e.done[i] = e.done[i] ? null : Date.now(); break;
+    case 'commit': // the timestamp starts the rest timer
+      e.sets.push({ reps: hasReps(openId) ? e.next : null, at: Date.now() });
+      e.next = prefillReps(openId, e.sets.length);
+      break;
+    case 'undo': e.next = e.sets.pop().reps; break;
     case 'rir': e.rir = e.rir === Number(b.dataset.n) ? null : Number(b.dataset.n); break;
-    case 'addset': e.reps.push(e.reps.at(-1) ?? null); e.done.push(null); break;
     case 'inc':
     case 'dec': {
       const sign = b.dataset.act === 'inc' ? 1 : -1;
       if (b.dataset.field === 'load') e.load = Math.max(0, round((e.load ?? 0) + sign * (STEP[loadType(openId)] ?? 1)));
-      else if (e.reps[i] != null) e.reps[i] = Math.max(0, e.reps[i] + sign);
-      else e.reps[i] = e.reps[i - 1] ?? program.find(p => p.exercise === openId)?.rep_range?.[1] ?? 0; // empty field: start somewhere sensible
+      else if (e.next != null) e.next = Math.max(0, e.next + sign);
+      else e.next = program.find(p => p.exercise === openId)?.rep_range?.[1] ?? 0; // empty field: start somewhere sensible
       break;
     }
     default: return;
@@ -273,7 +292,7 @@ $('#detail').addEventListener('input', ev => {
   const f = ev.target.dataset.field;
   const e = day.ex[openId];
   if (f === 'load') e.load = num(ev.target.value);
-  else if (f === 'reps') e.reps[Number(ev.target.dataset.i)] = num(ev.target.value);
+  else if (f === 'reps') e.next = num(ev.target.value);
   else if (f === 'note') e.note = ev.target.value;
   else return;
   save();
@@ -291,6 +310,7 @@ document.addEventListener('visibilitychange', async () => {
 async function loadDay() {
   const all = await dbAll();
   const key = todayKey();
+  all.forEach(upgrade);
   day = all.find(d => d.date === key) ?? { date: key, note: '', state: [], ex: {} };
   buildLast(all.filter(d => d.date !== key));
   if (openId) { closeDetail(); history.back(); }

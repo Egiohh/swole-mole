@@ -53,7 +53,6 @@ button, input, textarea { font: inherit; color: inherit; }
 }
 .top img { width: 36px; height: 36px; border-radius: 8px; }
 .top h1 { font-size: 20px; margin: 0; flex: 1; }
-.top span { color: var(--muted); }
 
 #list {
   list-style: none;
@@ -169,17 +168,28 @@ button, input, textarea { font: inherit; color: inherit; }
   font-size: 26px;
   color: var(--muted);
 }
-.set.done .tick { background: var(--done); border-color: var(--done); color: #fff; }
-.set.done input { color: var(--muted); }
+.set .tick { border-color: var(--done); color: var(--done); }
 
-.addset {
-  margin-top: 8px;
-  min-height: 44px;
-  padding: 0 16px;
-  border: 1px dashed var(--muted);
-  border-radius: 12px;
+/* A committed set: read-only, one compact line. */
+.doneset {
+  display: flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--done);
+  font-weight: 600;
+}
+.undo {
+  margin-left: auto;
+  min-height: 36px;
+  padding: 0 8px;
+  border: 0;
   background: none;
   color: var(--muted);
+  font-size: 14px;
+  text-decoration: underline;
 }
 
 .chips { display: flex; gap: 8px; }
