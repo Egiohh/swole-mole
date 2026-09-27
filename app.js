@@ -2,7 +2,8 @@
 'use strict';
 
 // +/- step and unit label per load_type (see CLAUDE.md, "Data contract").
-const STEP = { 'stack-kg': 5, 'dumbbell-per-hand-kg': 1, 'bodyweight-plus-kg': 2.5, 'time-seconds': 5 };
+// 1 kg on the stacks too: the gym has magnetic add-on weights.
+const STEP = { 'stack-kg': 1, 'dumbbell-per-hand-kg': 1, 'bodyweight-plus-kg': 1, 'time-seconds': 5 };
 const UNIT = { 'stack-kg': 'kg', 'dumbbell-per-hand-kg': 'kg per hand', 'bodyweight-plus-kg': 'kg added', 'time-seconds': 'seconds' };
 const REST_HIDE_MS = 30 * 60 * 1000;      // rest timer disappears after 30 min
 const NEW_DAY_IDLE_MS = 3 * 60 * 60 * 1000; // past midnight, stay on the old day until 3 h idle
@@ -35,7 +36,7 @@ function getPref(key, fallback) {
 function setPref(key, value) {
   try { localStorage.setItem('swolemole.' + key, value); } catch { /* private mode: keep the default */ }
 }
-const LANGS = [['it', 'Italiano'], ['en', 'English']]; // nothing is translated yet
+const LANGS = [['it', 'Italiano'], ['en', 'English']]; // only exercise names change (see title())
 const getLang = () => getPref('lang', 'en');
 const timerOn = () => getPref('timer', 'on') === 'on';
 const tabScroll = {}; // window scroll per tab
@@ -45,6 +46,20 @@ const pad = n => String(n).padStart(2, '0');
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const isFreeform = id => id.startsWith('ff-');
 const name = id => isFreeform(id) ? day.ex[id]?.freeform ?? '' : id.charAt(0).toUpperCase() + id.slice(1).replace(/-/g, ' ');
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+
+// In Italian the title is the first alias (the Italian gym name). There is no
+// translated name field: the Gym project's aliases are what the gym calls it.
+function title(id) {
+  const alias = exercises[id]?.aliases?.[0];
+  return getLang() === 'it' && alias ? cap(alias) : name(id);
+}
+
+// The detail subtitle shows whatever the title doesn't: the other names.
+function subtitle(id) {
+  const aliases = exercises[id]?.aliases ?? [];
+  return getLang() === 'it' && aliases.length ? [name(id), ...aliases.slice(1)] : aliases;
+}
 const loadType = id => exercises[id]?.load_type ?? 'stack-kg';
 const hasLoad = id => loadType(id) !== 'bodyweight';
 const hasReps = id => loadType(id) !== 'time-seconds';
@@ -207,14 +222,24 @@ function rowHtml(item) {
   } else {
     sub = 'no history yet';
   }
-  return `<li class="row${isComplete(item) ? ' complete' : ''}" data-id="${esc(id)}">
+  const cls = ['', ' partial', ' complete'][stage(item)];
+  return `<li class="row${cls}" data-id="${esc(id)}">
     ${icon(esc(id))}
-    <div><div class="name">${esc(name(id))}</div><div class="sub">${esc(sub)}</div></div>
+    <div><div class="name">${esc(title(id))}</div><div class="sub">${esc(sub)}</div></div>
   </li>`;
 }
 
-// Completed exercises sink to the bottom; otherwise the given order (sort is stable).
-const byDone = items => [...items].sort((a, b) => isComplete(a) - isComplete(b));
+// 0 = not started, 1 = in progress (some sets committed, not all), 2 = complete.
+// Derived from the committed sets like isComplete(); never stored.
+function stage(item) {
+  if (isComplete(item)) return 2;
+  return day.ex[item.exercise]?.sets.length ? 1 : 0;
+}
+
+// In-progress exercises first (handy when alternating between two during
+// rests), then untouched ones, completed last; otherwise the given order.
+const SORT_RANK = [1, 0, 2]; // indexed by stage()
+const byDone = items => [...items].sort((a, b) => SORT_RANK[stage(a)] - SORT_RANK[stage(b)]);
 
 function renderList() {
   $('#list').innerHTML = byDone(program).map(rowHtml).join('')
@@ -224,7 +249,7 @@ function renderList() {
 // Tab 2: library exercises not in the program, or those doable at home.
 function renderMore() {
   const inProgram = new Set(program.map(p => p.exercise));
-  const lib = Object.values(exercises).sort((a, b) => a.id.localeCompare(b.id));
+  const lib = Object.values(exercises).sort((a, b) => title(a.id).localeCompare(title(b.id)));
   const pick = moreView === 'home'
     ? lib.filter(x => isHome(x.id))
     : lib.filter(x => !inProgram.has(x.id));
@@ -291,7 +316,7 @@ function renderDetail() {
   detail.innerHTML = `
     <header class="bar">
       <button class="back" data-act="back" aria-label="Back"><span>‹</span>${icon(esc(id))}</button>
-      <div><h2>${esc(name(id))}</h2>${ex.aliases?.length ? `<div class="sub">${esc(ex.aliases.join(' · '))}</div>` : ''}</div>
+      <div><h2>${esc(title(id))}</h2>${subtitle(id).length ? `<div class="sub">${esc(subtitle(id).join(' · '))}</div>` : ''}</div>
     </header>
     ${target ? `<p class="target">${esc(target)}</p>` : ''}
     ${isFreeform(id) ? '<p class="target">New movement · logged as a trial</p>' : ''}
@@ -347,7 +372,7 @@ function renderDayTab() {
 // shared - so editing an exported day makes it pending again.
 function pendingDays() {
   return days
-    .filter(d => { const out = toDay(d); return (out.note || out.state || out.exercises) && d.exported !== JSON.stringify(out); })
+    .filter(d => hasContent(d) && d.exported !== JSON.stringify(toDay(d)))
     .sort((a, b) => b.date.localeCompare(a.date));
 }
 
@@ -358,13 +383,34 @@ function renderExport(msg = '', offerCopy = false) {
   badge.textContent = pending.length;
   const el = $('#export');
   if (!el) return;
-  el.innerHTML = pending.length ? `
-    <button class="share" data-act="export">Share ${pending.length} session${pending.length > 1 ? 's' : ''} to Drive</button>
-    <p class="nag">Not exported yet: ${pending.map(d => esc(fmtDate(d.date)) + (d === day ? ' (today)' : '')).join(', ')}</p>
-    <p class="sub">Pick Drive, then the SwoleMole-Inbox folder. The export is also your backup.</p>`
-    : '<p class="sub">All sessions exported ✓</p>';
+  if (pending.length) {
+    el.innerHTML = `
+      <button class="share" data-act="export">Share ${pending.length} session${pending.length > 1 ? 's' : ''} to Drive</button>
+      <p class="nag">Not exported yet: ${pending.map(d => esc(fmtDate(d.date)) + (d === day ? ' (today)' : '')).join(', ')}</p>
+      <p class="sub">Pick Drive, then the SwoleMole-Inbox folder. The export is also your backup.</p>`;
+  } else if (hasContent(day)) {
+    // Already exported, but re-sharing stays possible (e.g. to be sure a file
+    // really landed). Any edit makes the day pending again anyway.
+    el.innerHTML = `
+      <p class="sub">All sessions exported ✓</p>
+      <button class="copy" data-act="export">Share today's session again</button>`;
+  } else {
+    el.innerHTML = '<p class="sub">All sessions exported ✓</p>';
+  }
   if (msg) el.insertAdjacentHTML('beforeend', `<p class="msg">${esc(msg)}</p>`);
-  if (offerCopy && pending.length) el.insertAdjacentHTML('beforeend', '<button class="copy" data-act="copy">Copy to clipboard instead</button>');
+  if (offerCopy && exportList().length) el.insertAdjacentHTML('beforeend', '<button class="copy" data-act="copy">Copy to clipboard instead</button>');
+}
+
+function hasContent(d) {
+  const out = toDay(d);
+  return !!(out.note || out.state || out.exercises);
+}
+
+// What the share button sends: every pending day, or - when everything is
+// exported - today again.
+function exportList() {
+  const pending = pendingDays();
+  return pending.length ? pending : hasContent(day) ? [day] : [];
 }
 
 async function markExported(list) {
@@ -376,7 +422,7 @@ async function markExported(list) {
 
 // Clipboard route: one JSON day object, or an array of them for several days.
 async function copyDays() {
-  const list = pendingDays();
+  const list = exportList();
   if (!list.length) return;
   const out = list.map(toDay);
   try {
@@ -393,7 +439,7 @@ async function copyDays() {
 // pre-check says yes anyway - share() then fails with "Permission denied".
 // text/plain is on the allow-list; the content is the same JSON.
 async function exportDays() {
-  const list = pendingDays();
+  const list = exportList();
   if (!list.length) return;
   const files = list.map(d => new File([JSON.stringify(toDay(d), null, 2) + '\n'], `${d.date}.txt`, { type: 'text/plain' }));
   if (!navigator.canShare?.({ files })) {
@@ -461,7 +507,7 @@ function renderSettings(msg = '') {
     <label class="lbl">Language</label>
     <div class="segmented">${LANGS.map(([code, label]) =>
       `<button class="${getLang() === code ? 'on' : ''}" data-lang="${code}">${label}</button>`).join('')}</div>
-    <p class="sub">Translations are not in yet — the app stays in English for now.</p>
+    <p class="sub">Italiano names exercises by their Italian gym name (the first alias in the library). Everything else stays in English.</p>
     <label class="lbl">Rest timer</label>
     <div class="segmented">${[['on', 'On'], ['off', 'Off']].map(([v, label]) =>
       `<button class="${getPref('timer', 'on') === v ? 'on' : ''}" data-timer="${v}">${label}</button>`).join('')}</div>
@@ -498,7 +544,7 @@ $('#settings').addEventListener('click', ev => {
   const b = ev.target.closest('button');
   if (!b) return;
   if (b.dataset.act === 'back') { history.back(); return; }
-  if (b.dataset.lang) { setPref('lang', b.dataset.lang); renderSettings(); return; }
+  if (b.dataset.lang) { setPref('lang', b.dataset.lang); renderSettings(); render(); return; }
   if (b.dataset.timer) { setPref('timer', b.dataset.timer); renderSettings(); renderRest(); return; }
   if (b.dataset.act !== 'reset') return;
   if (Date.now() - resetArmedAt < RESET_CONFIRM_MS) {

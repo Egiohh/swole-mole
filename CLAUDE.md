@@ -104,9 +104,13 @@ Tapping a row expands it to fullscreen:
   Tapping it or the Android back swipe returns to the list at the same scroll
   position.
 
-A row goes grey once the planned number of sets is committed, and completed
-rows sink to the bottom of the list (otherwise program order). **Completion is
-derived from the committed sets — never persist a "completed" field.**
+Rows have three derived states (`stage()`): **in progress** (some sets
+committed, fewer than planned) gets an amber edge and tint and sorts to the
+**top** — the owner alternates between exercises during rests; **not started**
+keeps program order; **complete** goes grey and sinks to the bottom. On the
+More tab (no planned sets) any logged exercise counts as in progress.
+**All of it is derived from the committed sets — never persist a state
+field.**
 
 **Rest timer.** Committing a set shows a count-up of elapsed rest.
 
@@ -157,7 +161,10 @@ The Day tab badge shows the number of unexported sessions.
 - Free-text day note.
 - **Export button**: "Share N sessions to Drive", listing the unexported dates
   (slightly nagging — the export is also the backup). Shares every pending day
-  at once, one file each.
+  at once, one file each. When everything is exported and today has content,
+  it stays as an outlined **"Share today's session again"** — the owner wants
+  to be able to re-upload at will (each re-share is another file in the inbox;
+  the merge takes the newest).
 - **Coaching notes** (v1.5), shown at the top when present: read-only text
   from `data/coaching.json`, written by Claude in the data project as
   `C:\Progetti\Gym\coaching.json` and copied by `tools/sync_data.py` (which
@@ -189,8 +196,8 @@ A fullscreen page like the exercise view (back swipe or `‹` closes it), and
 the place for future tests and controls.
 
 - **Language**: Italiano / English. Stored per device in `localStorage`
-  (`swolemole.lang`, default `en`). **Nothing is translated yet** — it is only
-  the stored preference.
+  (`swolemole.lang`, default `en`). Italiano only switches exercise names to
+  their Italian gym names (see "Italian names" under Data contract).
 - **Rest timer**: On / Off (`swolemole.timer`, default `on`). Off only hides
   the count-up; set timestamps are still recorded (the day-boundary rule uses
   them).
@@ -216,8 +223,15 @@ exercise id**. Ids are the names: display name is the id de-kebab-cased; show
 `dumbbell-per-hand-kg` (weight of ONE dumbbell), `bodyweight` (no load),
 `bodyweight-plus-kg`, `time-seconds` (load is the hold time; no reps).
 
-`+`/`−` steps in `app.js` (`STEP`): stack 5 kg (measured on the gym's
-machines), dumbbell 1 kg, added weight 2.5 kg, time 5 s.
+`+`/`−` steps in `app.js` (`STEP`): 1 kg for every weight type (stack,
+dumbbell, added weight) — the gym has magnetic add-on weights for the stacks
+(owner, 2026-09-27) — and 5 s for timed holds.
+
+**Italian names:** there is no translated name field. With the language set
+to Italiano, `title()` shows the exercise's **first alias** (the Italian gym
+name, e.g. *pressa orizzontale*) and the detail subtitle shows the English
+name plus the remaining aliases. The More tab sorts by the displayed title.
+Nothing else is translated.
 
 ### Output
 

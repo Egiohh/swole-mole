@@ -10,6 +10,8 @@
   --done: #3fae5a;
   --warn-bg: #3a2a10;
   --warn-text: #ffd27a;
+  --partial-bg: #2a2416;
+  --partial-text: #fdbb1a;
   --tap: 56px;            /* minimum touch target: thumb, not fingertip */
   color-scheme: dark;
 }
@@ -24,6 +26,8 @@
     --done: #2b8a44;
     --warn-bg: #fff1d6;
     --warn-text: #6b4500;
+    --partial-bg: #fff6df;
+    --partial-text: #8a5a00;
     color-scheme: light;
   }
 }
@@ -81,6 +85,9 @@ button, input, textarea { font: inherit; color: inherit; }
 }
 .row .name { font-weight: 600; }
 .row.complete { opacity: 0.4; filter: grayscale(1); }
+/* In progress: some sets done, not all. Amber edge + tint, between the two. */
+.row.partial { box-shadow: inset 5px 0 0 var(--accent); background: var(--partial-bg); }
+.row.partial .sub { color: var(--partial-text); font-weight: 600; }
 
 .ico {
   flex: none;
