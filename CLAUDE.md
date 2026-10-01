@@ -21,6 +21,7 @@ than this file (e.g. `.json` file names, the 500-line budget) and lose.
 | Path | What |
 |---|---|
 | `index.html`, `app.js`, `styles.css` | The whole app. |
+| `WORKLOG.md` | Append-only history: what changed and why, field results, requests from the data project. **Add an entry for every change shipped** (and for field reports), under a `## dd/mm/yyyy` header once per day. This file (CLAUDE.md) stays the description of the app as it is now. |
 | `manifest.json`, `sw.js` | PWA install + offline cache. |
 | `icons/icon-source.png` | Original app icon (1254 px). `app-192.png` / `app-512.png` are resized from it. |
 | `icons/exercises/<exercise-id>.svg` | Per-exercise pictograms, named by exercise id. A missing file falls back to a neutral grey square. **House style** (keep every icon consistent): `viewBox="0 0 64 64"`; background `rect` rx 12 fill `#2a2a2a`; equipment strokes `#8c8c8c` width 4 (pads width 7); figure strokes `#fdbb1a` width 5; head a filled circle r 5.5; round caps and joins; no text, no gradients; side view unless front view reads better (e.g. pulldown). Must read at 48 px. Always draw the figure amber: exercises doable at home are tinted blue **at render time** (`.ico.home` → CSS `hue-rotate`, from the derived `isHome()`), never in the file. |
@@ -64,16 +65,17 @@ any infrastructure work.
   expand-to-fullscreen entry, set-by-set commit, load/reps steppers, cues and
   cautions, completed-row greying, rest timer, IndexedDB persistence, "last
   time" prefill.
-- **v1 — export. ← BUILT, not yet field-tested.** Bottom tab bar, the Day tab
-  (mood chips, day note), share-to-Drive with the unexported count. One file
-  per session.
-- **v1.5 — tab 2. ← BUILT, not yet field-tested.** The More tab ("Not in
-  program" / "At home" / freeform), and coaching notes from `coaching.json`.
-  This completes the planned app.
-- **Data import. ← BUILT 01/10/2026, not yet field-tested.** Reference data
+- **v1 — export. ← BUILT, in use** (exports since 26/09/2026). Bottom tab
+  bar, the Day tab (mood chips, day note), share-to-Drive with the unexported
+  count. One file per session.
+- **v1.5 — tab 2. ← BUILT, in use** (home sessions 28–29/09/2026). The More
+  tab ("Not in program" / "At home" / freeform), and coaching notes. This
+  completes the planned app.
+- **Data import. ← BUILT, field-confirmed 01/10/2026.** Reference data
   imported from Drive instead of bundled; `data/` and `tools/sync_data.py`
   removed. Also added that day: header clock (replacing the rest bubble),
-  per-exercise coaching tips, `done_at` in the export.
+  per-exercise coaching tips, `done_at` in the export (`done_at` and the
+  header clock not yet seen in a gym session).
 - **v2 — only if ever actually wanted.** Nothing planned. No speculative
   features. Charts, history and statistics are explicitly *not* wanted.
 
