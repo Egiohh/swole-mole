@@ -15,14 +15,18 @@ const MOODS = [
   ['stressed', '😬', 'stressed'], ['rushed', '⏱️', 'rushed'],
 ];
 
+// Reference data all comes from the imported bundle (see "Data import"); the
+// app ships none of its own. Empty until the first import.
 let exercises = {};   // id -> library entry
 let program = [];     // program items: { exercise, sets, rep_range, per_side, note }
-let bundledLast = {}; // id -> { date, load, reps } from data/last.json
+let bundledLast = {}; // id -> { date, load, reps }, the bundle's "last"
 let last = {};        // id -> most recent { date, load, reps }, bundled or local
+let venues = null;    // { gym, home }
+let coaching = null;  // { updated, text, exercises: { id: [{ text, since }] } }, or null
+let dataAt = null;    // the bundle's generated_at (ms), shown as "Data: ..."
+let importMsg = '';   // result of the last import attempt
 let days = [];        // every day record in IndexedDB, today's included
 let day = null;       // today's record: { date, note, state, ex: { id: entry }, exported }
-let venues = null;    // data/venues.json "venues": { gym, home }
-let coaching = null;  // data/coaching.json { updated, text }, or null when absent
 let openId = null;    // exercise shown fullscreen, or null
 let tab = 'today';    // 'today' | 'more' | 'day'
 let moreView = 'other'; // tab 2 toggle: 'other' (not in program) | 'home'
@@ -71,13 +75,18 @@ function todayKey() {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
-// ---------- IndexedDB: one record per day, keyed by date ----------
+// ---------- IndexedDB: "days", one record per day keyed by date; "ref", the
+// imported data bundle under the key "bundle" ----------
 
 let dbPromise = null;
 function db() {
   dbPromise ??= new Promise((ok, fail) => {
-    const req = indexedDB.open('swolemole', 1);
-    req.onupgradeneeded = () => req.result.createObjectStore('days', { keyPath: 'date' });
+    const req = indexedDB.open('swolemole', 2);
+    req.onupgradeneeded = () => {
+      const d = req.result;
+      if (!d.objectStoreNames.contains('days')) d.createObjectStore('days', { keyPath: 'date' });
+      if (!d.objectStoreNames.contains('ref')) d.createObjectStore('ref'); // added in version 2
+    };
     req.onsuccess = () => ok(req.result);
     req.onerror = () => fail(req.error);
   });
@@ -96,6 +105,25 @@ async function dbAll() {
 // Called on every change - there is no save button.
 async function save(rec = day) {
   (await db()).transaction('days', 'readwrite').objectStore('days').put(rec);
+}
+
+async function loadBundle() {
+  const store = (await db()).transaction('ref').objectStore('ref');
+  return new Promise((ok, fail) => {
+    const req = store.get('bundle');
+    req.onsuccess = () => ok(req.result);
+    req.onerror = () => fail(req.error);
+  });
+}
+
+// One put in one transaction: the old bundle is replaced whole or not at all.
+async function saveBundle(bundle) {
+  const tx = (await db()).transaction('ref', 'readwrite');
+  tx.objectStore('ref').put(bundle, 'bundle');
+  return new Promise((ok, fail) => {
+    tx.oncomplete = ok;
+    tx.onerror = tx.onabort = () => fail(tx.error);
+  });
 }
 
 // ---------- Day record -> log.schema.json "day" object ----------
@@ -263,8 +291,12 @@ const SORT_RANK = [1, 0, 2]; // indexed by stage()
 const byDone = items => [...items].sort((a, b) => SORT_RANK[stage(a)] - SORT_RANK[stage(b)]);
 
 function renderList() {
-  $('#list').innerHTML = byDone(program).map(rowHtml).join('')
-    || '<li class="empty">The program is empty. Run tools/sync_data.py.</li>';
+  $('#list').innerHTML = byDone(program).map(rowHtml).join('') || `
+    <li class="empty">
+      ${dataAt ? 'The imported program is empty.' : 'No program yet. Import your data file: in Drive, SwoleMole-Outbox, swole-mole-data.json.'}
+      <button class="share" data-act="import">Import data</button>
+      ${importMsg ? `<p class="msg">${esc(importMsg)}</p>` : ''}
+    </li>`;
 }
 
 // Tab 2: library exercises not in the program, or those doable at home.
@@ -378,7 +410,7 @@ function fmtDate(date) {
 }
 const fmtIso = iso => iso.split('-').reverse().join('/'); // 2026-10-01 -> 01/10/2026
 
-// Read-only notes written by Claude in the Gym project (data/coaching.json).
+// Read-only notes written by Claude in the Gym project (the bundle's "coaching").
 function coachingHtml() {
   if (!coaching?.text) return '';
   return `<details class="coach" open>
@@ -406,8 +438,18 @@ function renderDayTab() {
       `<button class="mood${day.state.includes(tag) ? ' on' : ''}" data-mood="${tag}"><span>${emoji}</span>${label}</button>`).join('')}</div>
     <label class="lbl">Day note</label>
     <textarea data-field="daynote" rows="4" placeholder="Weather, schedule, how it felt…">${esc(day.note)}</textarea>
-    <div id="export"></div>`;
+    <div id="export"></div>
+    <label class="lbl">Program &amp; coaching</label>
+    <p class="sub">${dataAt ? `Data: ${fmtStamp(dataAt)}` : 'No data imported yet.'}</p>
+    <button class="copy" data-act="import">Update data</button>
+    <p class="sub">Pick swole-mole-data.json in Drive, folder SwoleMole-Outbox. Your logged sessions are never touched.</p>
+    ${importMsg ? `<p class="msg">${esc(importMsg)}</p>` : ''}`;
   renderExport();
+}
+
+function fmtStamp(ms) {
+  const d = new Date(ms);
+  return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
 // ---------- Export: one file per day, through the Android share sheet ----------
@@ -500,6 +542,69 @@ async function exportDays() {
   }
   await markExported(list);
   renderExport();
+}
+
+// ---------- Data import: the bundle comes from Drive through the file picker ----------
+
+// Reference data (library, program, venues, coaching, last-known numbers) is
+// built by build_bundle.py in the Gym project and never committed here: the
+// site is public, and updating coaching must not need a deploy. Mirror image
+// of the export - no OAuth, no Drive API.
+const BUNDLE_VERSION = 1;
+
+// The reason a parsed file can't be used, or '' if it's fine.
+function bundleProblem(b) {
+  if (!b || typeof b !== 'object' || b.bundle_version == null) return "that isn't a Swole Mole data file (swole-mole-data.json)";
+  if (b.bundle_version !== BUNDLE_VERSION) return `the file is format version ${b.bundle_version} and this app reads version ${BUNDLE_VERSION}; the app needs updating`;
+  if (!Array.isArray(b.exercises) || !b.exercises.length) return 'the file has no exercises';
+  if (!Array.isArray(b.program?.blocks)) return 'the file has no program';
+  return '';
+}
+
+function useBundle(b) {
+  exercises = {};
+  b.exercises.forEach(e => { exercises[e.id] = e; });
+  program = b.program.blocks.flatMap(bl => bl.items); // one flat list, whatever the blocks
+  venues = b.venues ?? null;
+  coaching = b.coaching ?? null;
+  bundledLast = b.last ?? {};
+  dataAt = b.generated_at ?? null;
+  // b.suggested is not used: the More tab already lists the whole library, and
+  // a suggested id missing from the library can't be logged anyway.
+}
+
+// No accept filter: Android's picker greys out a .json that Drive labels with
+// some other type, and a wrong file is caught by the checks anyway.
+function pickBundle() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.addEventListener('change', () => { if (input.files[0]) importBundle(input.files[0]); });
+  input.click();
+}
+
+// Check everything first; a bad file must never leave the app half-updated or
+// empty. Session logs live in another store and are not touched.
+async function importBundle(file) {
+  let b;
+  try {
+    b = JSON.parse(await file.text());
+  } catch {
+    return importDone(`Not imported: ${file.name} isn't a Swole Mole data file. Nothing changed.`);
+  }
+  const why = bundleProblem(b);
+  if (why) return importDone(`Not imported: ${why}. Nothing changed.`);
+  try {
+    await saveBundle(b);
+  } catch (err) {
+    return importDone(`Not imported, could not save it: ${err.message}. Nothing changed.`);
+  }
+  useBundle(b);
+  importDone(`Data updated ✓ ${b.exercises.length} exercises, ${program.length} in the program.`);
+}
+
+async function importDone(msg) {
+  importMsg = msg;
+  await loadDay(); // rebuilds "last time" and re-renders everything with the new data
 }
 
 function showTab(name) {
@@ -612,6 +717,7 @@ window.addEventListener('popstate', () => {
 $('#list').addEventListener('click', ev => {
   const row = ev.target.closest('.row');
   if (row) openDetail(row.dataset.id);
+  else if (ev.target.closest('[data-act=import]')) pickBundle(); // empty state
 });
 
 function submitFreeform() {
@@ -688,6 +794,7 @@ $('#daytab').addEventListener('click', ev => {
   if (!b) return;
   if (b.dataset.act === 'export') { exportDays(); return; }
   if (b.dataset.act === 'copy') { copyDays(); return; }
+  if (b.dataset.act === 'import') { pickBundle(); return; }
   const tag = b.dataset.mood;
   if (!tag) return;
   day.state = day.state.includes(tag) ? day.state.filter(t => t !== tag) : [...day.state, tag];
@@ -728,18 +835,11 @@ async function start() {
   navigator.storage?.persist?.();
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
   try {
-    const get = url => fetch(url).then(r => { if (!r.ok) throw new Error(`${url}: ${r.status}`); return r.json(); });
-    const [lib, prog, lastJson, ven] = await Promise.all([get('data/exercises.json'), get('data/program.json'),
-      get('data/last.json'), get('data/venues.json')]);
-    lib.exercises.forEach(e => { exercises[e.id] = e; });
-    program = prog.blocks.flatMap(b => b.items); // one flat list, whatever the blocks
-    bundledLast = lastJson;
-    venues = ven.venues;
+    // Reference data comes from the device, not the network: nothing to wait for.
+    const bundle = await loadBundle();
+    if (bundle) useBundle(bundle);
     await loadDay();
     setInterval(renderClock, 1000);
-    // Optional and possibly absent, so never cached: fetched after the first
-    // render, or a dead gym network would hold up the whole start waiting for it.
-    get('data/coaching.json').then(c => { coaching = c; renderDayTab(); }).catch(() => {});
   } catch (err) {
     $('#list').innerHTML = `<li class="empty">Could not start: ${esc(err.message)}</li>`;
   }

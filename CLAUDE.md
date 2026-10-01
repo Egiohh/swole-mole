@@ -11,7 +11,10 @@ the separate **data project** at `C:\Progetti\Gym` (with Claude in Cowork),
 which reads the exported files. The app *produces* data; it never analyses it.
 
 Originally specified as "GymBro" in `C:\Progetti\Gym\WEBAPP-SPEC.md`. This file
-supersedes that spec.
+supersedes that spec, but the data project still writes dated change requests
+into it (01/10/2026: data import, header clock, coaching tips, `done_at`). When
+pointed at it, diff it against this file and catch up; parts of it are older
+than this file (e.g. `.json` file names, the 500-line budget) and lose.
 
 ## Files
 
@@ -19,10 +22,6 @@ supersedes that spec.
 |---|---|
 | `index.html`, `app.js`, `styles.css` | The whole app. |
 | `manifest.json`, `sw.js` | PWA install + offline cache. |
-| `data/exercises.json`, `data/program.json`, `data/venues.json` | Copies from the data project. **Read-only — never edit here.** |
-| `data/last.json` | Derived from the data project's `log.json`: most recent load/reps per exercise, numbers only. Prefill on a fresh install or after IndexedDB eviction. |
-| `data/coaching.json` | Optional. Coaching notes from the data project, shown on the Day tab. |
-| `tools/sync_data.py` | Re-copies the data files (and `coaching.json` when present). Run `python tools/sync_data.py` whenever the data project changes. |
 | `icons/icon-source.png` | Original app icon (1254 px). `app-192.png` / `app-512.png` are resized from it. |
 | `icons/exercises/<exercise-id>.svg` | Per-exercise pictograms, named by exercise id. A missing file falls back to a neutral grey square. **House style** (keep every icon consistent): `viewBox="0 0 64 64"`; background `rect` rx 12 fill `#2a2a2a`; equipment strokes `#8c8c8c` width 4 (pads width 7); figure strokes `#fdbb1a` width 5; head a filled circle r 5.5; round caps and joins; no text, no gradients; side view unless front view reads better (e.g. pulldown). Must read at 48 px. Always draw the figure amber: exercises doable at home are tinted blue **at render time** (`.ico.home` → CSS `hue-rotate`, from the derived `isHome()`), never in the file. |
 
@@ -53,7 +52,8 @@ a specific failure mode.
 | **Export via the Web Share API** (`navigator.share` with a file). | One tap, pick Google Drive from the share sheet, file lands in the `SwoleMole-Inbox` folder in My Drive. Zero auth code. |
 | **Single user, single device.** | No sync, no conflict resolution, no merge UI. |
 | **Log set by set, during the session.** | "I always have the phone out anyway." Honest per-set rep counts are an open question in the training data; rounding at the end would defeat the purpose. |
-| **The program is ONE flat list of exercises.** | The owner wings it at the gym — no A/B days, no day picker. The app flattens every `blocks[].items` in `program.json` into one list. If per-day programs are ever wanted, that is solved with multiple program files or a bigger single one, not now. |
+| **Reference data arrives by IMPORT from Drive, never from GitHub** (01/10/2026). | Updating coaching must not need a code change and a push: the data project owns the data, this repo owns the code. The repo carries no data at all — the old `data/` files remain in git history, which the owner explicitly doesn't mind. |
+| **The program is ONE flat list of exercises.** | The owner wings it at the gym — no A/B days, no day picker. The app flattens every `blocks[].items` of the bundle's `program` into one list. If per-day programs are ever wanted, that is solved with multiple program files or a bigger single one, not now. |
 
 ## Build order
 
@@ -70,6 +70,10 @@ any infrastructure work.
 - **v1.5 — tab 2. ← BUILT, not yet field-tested.** The More tab ("Not in
   program" / "At home" / freeform), and coaching notes from `coaching.json`.
   This completes the planned app.
+- **Data import. ← BUILT 01/10/2026, not yet field-tested.** Reference data
+  imported from Drive instead of bundled; `data/` and `tools/sync_data.py`
+  removed. Also added that day: header clock (replacing the rest bubble),
+  per-exercise coaching tips, `done_at` in the export.
 - **v2 — only if ever actually wanted.** Nothing planned. No speculative
   features. Charts, history and statistics are explicitly *not* wanted.
 
@@ -151,7 +155,7 @@ committed set. A segmented toggle *above* the list:
 | **At home** | Exercises performable at home. |
 
 **"At home" is DERIVED**: `requires ⊆ venues.home.equipment`, from each
-exercise's `requires` and `data/venues.json`. Never add an `at_home` field —
+exercise's `requires` and the imported `venues`. Never add an `at_home` field —
 buying a pull-up bar must be one edit to `venues.json`. Show
 `venues.home.notes` in that view (the home dumbbell only loads to 1/3/5/7/9 kg).
 Home sessions are a sparse fallback, not a regime: no schedule, no streaks, no
@@ -179,16 +183,16 @@ The Day tab badge shows the number of unexported sessions.
   it stays as an outlined **"Share today's session again"** — the owner wants
   to be able to re-upload at will (each re-share is another file in the inbox;
   the merge takes the newest).
-- **Coaching notes** (v1.5), shown at the top when present: read-only text
-  from `data/coaching.json`, written by Claude in the data project as
-  `C:\Progetti\Gym\coaching.json` and copied by `tools/sync_data.py` (which
-  also removes it here when it's deleted there). Format (every key optional):
+- **Coaching notes** (v1.5), shown at the top when present: read-only, the
+  bundle's `coaching` key (written by Claude in the data project as
+  `C:\Progetti\Gym\coaching.json`). Format (every key optional):
   `{ "updated": "YYYY-MM-DD", "text": "plain text, \n for line breaks",
   "exercises": { "<id>": [ { "text": "Try 105 kg.", "since": "YYYY-MM-DD" } ] } }`.
   `text` shows here; `exercises` are per-exercise tips shown in the detail
   view; `since` is for Claude's pruning and ignored. `updated` is displayed as
-  DD/MM/YYYY. Missing file = no section. Same origin, cached by the service
-  worker. The app never writes it. **It is public once pushed** — see Risks.
+  DD/MM/YYYY. No `text` = no section. The app never writes it.
+- **Program & coaching** (bottom): "Data: DD/MM/YYYY HH:MM" (the bundle's
+  `generated_at`) and the **Update data** button — see "Data import".
 
 **Export mechanics** (`exportDays()` in `app.js`):
 - A day is *pending* while it has content and its current `toDay()` output
@@ -230,12 +234,43 @@ The app is a producer for the data project's log format. Everything downstream
 depends on getting this exactly right. Reference: `C:\Progetti\Gym\schema\log.schema.json`,
 the `day` definition.
 
-### Inputs
+### Inputs: the data import
 
-`data/exercises.json`, `data/program.json`, `data/venues.json`, `data/last.json`
-— bundled static files. The app never writes them and **never invents an
-exercise id**. Ids are the names: display name is the id de-kebab-cased; show
-`aliases` (Italian gym names) where present.
+All reference data — library, current program, venues, coaching, last-known
+numbers — arrives as **one file**, `swole-mole-data.json`, built by the data
+project's `build_bundle.py` into `SwoleMole-Outbox` in My Drive (overwritten
+in place on every build). The app ships **no data of its own** and never
+fetches any from its origin.
+
+- **Mechanism** (`pickBundle()` / `importBundle()`): "Update data" on the Day
+  tab, or "Import data" on the empty Today tab, opens the Android file picker
+  (a plain `<input type=file>`, created on the fly, **no `accept` filter** so
+  Drive's labelling of the file type can't grey it out); he picks the file in
+  Drive. No OAuth, no Drive API.
+- **Validate first** (`bundleProblem()`): parses, `bundle_version` must be 1,
+  `exercises` a non-empty array, `program.blocks` an array. Any failure
+  rejects the whole file, keeps the existing data and says why in plain words.
+- **Replace wholesale and atomically**: the parsed bundle is stored as one
+  record (`ref` store, key `bundle`) in one IndexedDB transaction, and read
+  back at every start. Never merged field by field.
+- **Never touches session logs** (the `days` store).
+- **No data yet** (first run, or IndexedDB evicted): the Today tab shows one
+  line of explanation and an Import button. No fallback data.
+- `last` (`{ id: { date, load, reps } }`) seeds "last time" prefill; local
+  history for an exercise wins when it is newer. `suggested` is ignored: the
+  More tab already lists the whole library.
+
+Bundle shape (`bundle_version: 1`):
+
+```json
+{ "bundle_version": 1, "generated_at": 1790880000000,
+  "exercises": [ ... ], "program": { "blocks": [ ... ] }, "suggested": [ ... ],
+  "venues": { "gym": {}, "home": {} }, "coaching": { ... }, "last": { ... } }
+```
+
+The app never writes reference data and **never invents an exercise id**. Ids
+are the names: display name is the id de-kebab-cased; show `aliases` (Italian
+gym names) where present.
 
 `load_type` sets the unit and must be respected: `stack-kg`,
 `dumbbell-per-hand-kg` (weight of ONE dumbbell), `bodyweight` (no load),
@@ -332,10 +367,9 @@ Phone held one-handed, sometimes damp, between sets, by someone tired.
   picks up a deploy; code only loads at page open, so nothing changes
   mid-session. After one timeout the network is treated as dead for 30 s and
   everything is served from the cache at once (a connected-but-dead gym
-  network would otherwise cost 3 s per loading stage). Files that may be
-  absent (`coaching.json`) are never cached, so they are fetched *after* the
-  first render and must never block startup. `VERSION` in `sw.js` only needs
-  bumping to throw the whole cache away.
+  network would otherwise cost 3 s per loading stage). Only code and icons go
+  through it — reference data is read from IndexedDB. `VERSION` in `sw.js`
+  only needs bumping to throw the whole cache away.
 - **Never tell the owner to "clear site data"** to force an update: it also
   deletes IndexedDB, i.e. every unexported session.
 
@@ -349,12 +383,12 @@ beyond the library's `cues`; no editing the library or program from the app.
 
 - **IndexedDB can be evicted** (cleared browsing data, storage pressure).
   `persist()` reduces but doesn't eliminate this; the export is the backup.
+  Reference data is simply re-imported (needs a connection to reach Drive),
+  and its `last` restores the prefill.
 - **`navigator.share` with files** must be feature-detected with
   `navigator.canShare({ files })`. A clipboard fallback is not optional.
 - **GitHub Pages sites are public**, even from a private repo on a free plan.
-  `data/` (exercise cautions, loads) and a future `coaching.json` are readable
-  by anyone with the URL. Keep notes and anything personal out of the bundled
-  files — hence `last.json` carries numbers only.
+  That is why the repo carries code and icons only; data comes by import.
 
 ## Open questions
 

@@ -3,12 +3,11 @@
 // than NETWORK_TIMEOUT_MS) the cached copy is used. Code only loads when the
 // page opens, so a deploy never swaps code under a session in progress.
 // Bump VERSION only to throw the whole old cache away.
-const VERSION = 'v2';
+const VERSION = 'v3'; // v3: data/ removed, reference data is imported
 const CACHE = 'swolemole-' + VERSION;
 const NETWORK_TIMEOUT_MS = 3000;
 const SHELL = [
   './', 'index.html', 'app.js', 'styles.css', 'manifest.json',
-  'data/exercises.json', 'data/program.json', 'data/venues.json', 'data/last.json',
   'icons/app-192.png', 'icons/app-512.png',
 ];
 
