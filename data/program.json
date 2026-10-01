@@ -8,10 +8,10 @@
   "frequency_per_week": 3,
   "session_duration_max_min": 120,
   "effort": {
-    "policy": "Every set taken to or near failure. Self-reported as 3x15 at the limit, which is internally inconsistent - genuine failure on set 1 costs reps on set 3. Needs an honest count before it can be relied on.",
+    "policy": "MEASURED 27/09/2026, replacing the earlier self-report. Mean RIR 1.1 over 21 working sets; three of seven exercises taken to actual failure (RIR 0). Reps decline within exercises (chest press 15/13/10, row 15/15/12), so the previous '3x15 at the limit' self-report was not accurate - the inconsistency is resolved and this is what he actually does.",
     "target_rir": [
       0,
-      0
+      2
     ]
   },
   "default_rest_seconds": {

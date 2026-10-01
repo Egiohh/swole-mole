@@ -5,7 +5,7 @@
 // 1 kg on the stacks too: the gym has magnetic add-on weights.
 const STEP = { 'stack-kg': 1, 'dumbbell-per-hand-kg': 1, 'bodyweight-plus-kg': 1, 'time-seconds': 5 };
 const UNIT = { 'stack-kg': 'kg', 'dumbbell-per-hand-kg': 'kg per hand', 'bodyweight-plus-kg': 'kg added', 'time-seconds': 'seconds' };
-const REST_HIDE_MS = 30 * 60 * 1000;      // rest timer disappears after 30 min
+const REST_HIDE_MS = 60 * 60 * 1000;      // "since last set" disappears after 60 min
 const NEW_DAY_IDLE_MS = 3 * 60 * 60 * 1000; // past midnight, stay on the old day until 3 h idle
 
 // Mood chips -> the day's "state" array. Tag values are fixed by log.schema.json.
@@ -114,6 +114,7 @@ function toDay(rec) {
     if (e.sets.length) {
       p.sets = e.sets.length;
       if (hasReps(id)) p.reps = e.sets.map(s => s.reps);
+      p.done_at = e.sets.map(s => s.at); // session order and rest are derived from these downstream
     }
     if (e.rir != null) p.rir = e.rir;
     if (e.note) p.note = e.note;
@@ -176,6 +177,19 @@ function upgrade(rec) {
   return rec;
 }
 
+// Days shared before done_at was exported have a snapshot without it, and would
+// all look unexported again. If the snapshot matches today's output minus
+// done_at, nothing else changed: bring the snapshot up to date.
+function upgradeSnapshot(rec) {
+  if (!rec.exported || !Object.keys(exercises).length) return; // needs the library for toDay()
+  const now = toDay(rec);
+  const old = JSON.parse(JSON.stringify(now));
+  old.exercises?.forEach(p => delete p.done_at);
+  if (rec.exported !== JSON.stringify(old)) return;
+  rec.exported = JSON.stringify(now);
+  save(rec);
+}
+
 // Completion is derived from the committed sets, never stored. Without planned
 // sets (tab 2) nothing is ever "complete".
 function isComplete(item) {
@@ -184,6 +198,13 @@ function isComplete(item) {
 
 function lastDoneAt() {
   return Math.max(0, ...Object.values(day.ex).flatMap(e => e.sets.map(s => s.at)));
+}
+
+// The session starts with the first PROGRAM set: a warm-up on the bike or
+// home curls in the morning don't count. Infinity until then.
+function sessionStart() {
+  const inProgram = new Set(program.map(p => p.exercise));
+  return Math.min(...Object.entries(day.ex).filter(([id]) => inProgram.has(id)).flatMap(([, e]) => e.sets.map(s => s.at)));
 }
 
 // ---------- Rendering ----------
@@ -317,10 +338,12 @@ function renderDetail() {
     <header class="bar">
       <button class="back" data-act="back" aria-label="Back"><span>‹</span>${icon(esc(id))}</button>
       <div><h2>${esc(title(id))}</h2>${subtitle(id).length ? `<div class="sub">${esc(subtitle(id).join(' · '))}</div>` : ''}</div>
+      <span class="clock"></span>
     </header>
     ${target ? `<p class="target">${esc(target)}</p>` : ''}
     ${isFreeform(id) ? '<p class="target">New movement · logged as a trial</p>' : ''}
     ${item.note ? `<p class="sub">${esc(item.note)}</p>` : ''}
+    ${tipsHtml(id)}
     ${hasLoad(id) ? `<label class="lbl">Load <span>${UNIT[loadType(id)]}</span></label>${stepper('load', e.load)}` : '<p class="lbl">Bodyweight</p>'}
     <label class="lbl">Sets</label>
     <div class="sets">${done}${active}</div>
@@ -331,27 +354,48 @@ function renderDetail() {
     <details${e.note ? ' open' : ''}><summary>Note</summary><textarea data-field="note" rows="3">${esc(e.note)}</textarea></details>
     ${isFreeform(id) && !e.sets.length ? '<button class="remove" data-act="remove">Remove this entry</button>' : ''}`;
   detail.scrollTop = scroll;
+  renderClock();
 }
 
-function renderRest() {
-  const t = lastDoneAt();
-  const el = $('#rest');
-  const ms = Date.now() - t; // the timestamp is the truth; the interval only repaints
-  el.hidden = !timerOn() || !t || ms > REST_HIDE_MS;
-  if (!el.hidden) el.textContent = `Rest ${Math.floor(ms / 60000)}:${pad(Math.floor(ms / 1000) % 60)}`;
+// Header (list and detail): "18:42 · 2:15" = session start · since last set.
+// Soft on purpose: muted text, no colours, no thresholds. Both values come from
+// the stored set timestamps on every repaint; the 1 s interval only repaints
+// (Android suspends timers in the background, a tick counter would drift).
+function renderClock() {
+  const start = sessionStart();
+  let text = '';
+  if (start !== Infinity) {
+    const d = new Date(start);
+    text = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    const ms = Date.now() - lastDoneAt(); // last set of ANY exercise: that's the rest he had
+    if (timerOn() && ms <= REST_HIDE_MS) text += ` · ${Math.floor(ms / 60000)}:${pad(Math.floor(ms / 1000) % 60)}`;
+  }
+  document.querySelectorAll('.clock').forEach(el => { el.textContent = text; });
 }
 
 function fmtDate(date) {
   return new Date(date + 'T12:00').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
 }
+const fmtIso = iso => iso.split('-').reverse().join('/'); // 2026-10-01 -> 01/10/2026
 
 // Read-only notes written by Claude in the Gym project (data/coaching.json).
 function coachingHtml() {
   if (!coaching?.text) return '';
   return `<details class="coach" open>
-      <summary>Coaching notes${coaching.updated ? ` <span>· ${esc(fmtDate(coaching.updated))}</span>` : ''}</summary>
+      <summary>Coaching notes${coaching.updated ? ` <span>· ${esc(fmtIso(coaching.updated))}</span>` : ''}</summary>
       <p>${esc(coaching.text)}</p>
     </details>`;
+}
+
+// Per-exercise tips from the same file: "for now" targets and corrections, so
+// they sit above everything and look different from the permanent cues.
+function tipsHtml(id) {
+  const tips = coaching?.exercises?.[id];
+  if (!tips?.length) return '';
+  return `<div class="tips">
+      <div class="lbl">Coaching${coaching.updated ? ` <span>· updated ${esc(fmtIso(coaching.updated))}</span>` : ''}</div>
+      ${bullets(tips.map(t => t.text), '')}
+    </div>`;
 }
 
 function renderDayTab() {
@@ -475,7 +519,7 @@ function render() {
   renderMore();
   renderDayTab();
   if (openId) renderDetail();
-  renderRest();
+  renderClock();
 }
 
 // ---------- Navigation: the Android back gesture closes the detail view ----------
@@ -511,7 +555,7 @@ function renderSettings(msg = '') {
     <label class="lbl">Rest timer</label>
     <div class="segmented">${[['on', 'On'], ['off', 'Off']].map(([v, label]) =>
       `<button class="${getPref('timer', 'on') === v ? 'on' : ''}" data-timer="${v}">${label}</button>`).join('')}</div>
-    <p class="sub">The count-up shown after each set.</p>
+    <p class="sub">The time since your last set, in the header after the session start.</p>
     <label class="lbl">Today's session</label>
     <button class="danger${armed ? ' armed' : ''}" data-act="reset">${armed ? 'Tap again to erase today' : 'Reset today\'s session'}</button>
     <p class="sub">Erases everything logged today (${esc(fmtDate(day.date))}): sets, loads, notes, moods. Other days are untouched, and files already shared to Drive stay there.</p>
@@ -545,7 +589,7 @@ $('#settings').addEventListener('click', ev => {
   if (!b) return;
   if (b.dataset.act === 'back') { history.back(); return; }
   if (b.dataset.lang) { setPref('lang', b.dataset.lang); renderSettings(); render(); return; }
-  if (b.dataset.timer) { setPref('timer', b.dataset.timer); renderSettings(); renderRest(); return; }
+  if (b.dataset.timer) { setPref('timer', b.dataset.timer); renderSettings(); renderClock(); return; }
   if (b.dataset.act !== 'reset') return;
   if (Date.now() - resetArmedAt < RESET_CONFIRM_MS) {
     resetArmedAt = 0;
@@ -618,7 +662,7 @@ $('#detail').addEventListener('click', ev => {
   }
   save();
   renderDetail();
-  renderRest();
+  renderClock();
   renderExport();
 });
 
@@ -663,13 +707,14 @@ $('#daytab').addEventListener('input', ev => {
 document.addEventListener('visibilitychange', async () => {
   if (document.visibilityState !== 'visible') return;
   if (day.date !== todayKey() && Date.now() - lastDoneAt() > NEW_DAY_IDLE_MS) await loadDay();
-  renderRest();
+  renderClock();
 });
 
 // ---------- Startup ----------
 
 async function loadDay() {
   days = (await dbAll()).map(upgrade);
+  days.forEach(upgradeSnapshot);
   const key = todayKey();
   day = days.find(d => d.date === key);
   if (!day) days.push(day = { date: key, note: '', state: [], ex: {} });
@@ -691,7 +736,7 @@ async function start() {
     bundledLast = lastJson;
     venues = ven.venues;
     await loadDay();
-    setInterval(renderRest, 1000);
+    setInterval(renderClock, 1000);
     // Optional and possibly absent, so never cached: fetched after the first
     // render, or a dead gym network would hold up the whole start waiting for it.
     get('data/coaching.json').then(c => { coaching = c; renderDayTab(); }).catch(() => {});

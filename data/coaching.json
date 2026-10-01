@@ -1,0 +1,25 @@
+{
+  "updated": "2026-10-01",
+  "text": "Put the exercises you want to progress early in the session.\nFive easy minutes on the bike before lifting.",
+  "exercises": {
+    "horizontal-leg-press": [
+      { "text": "Try 105 kg.", "since": "2026-10-01" },
+      { "text": "Face forward. Judge depth by count, not by watching the stack.", "since": "2026-10-01" }
+    ],
+    "seated-cable-row": [
+      { "text": "Bend your knees to fetch the handle, chest up. Don't fold forward to reach it.", "since": "2026-09-27" }
+    ],
+    "roman-chair-back-extension": [
+      { "text": "Try pad setting 7.", "since": "2026-10-01" }
+    ],
+    "seated-pec-deck-fly": [
+      { "text": "Stay at 30 kg until the first set reaches 20.", "since": "2026-09-27" }
+    ],
+    "seated-machine-chest-press": [
+      { "text": "When all three sets reach 15, go to 60 kg.", "since": "2026-10-01" }
+    ],
+    "single-arm-chest-supported-row": [
+      { "text": "Breathe out on every pull.", "since": "2026-10-01" }
+    ]
+  }
+}

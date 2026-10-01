@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "$comment": "What equipment exists where. Joined with each exercise's 'requires' to derive where it can be performed - see validate.py. Never store 'can be done at home' on an exercise; it is derived from these two facts, so buying equipment reclassifies everything by editing one line here.",
+  "$comment": "What equipment exists where. Joined with each exercise's 'requires' to derive where it can be performed - see validate.py. Never store 'can be done at home' on an exercise; it is derived from these two facts, so buying equipment reclassifies everything by editing one line here. Logging app: Swole Mole (separate repo); its session files arrive in H:\\Il mio Drive\\SwoleMole-Inbox.",
   "venues": {
     "gym": {
       "label": "Gym",
@@ -13,7 +13,7 @@
         "pull-up-bar"
       ],
       "notes": [
-        "Surveyed 2026-09-19. All equipment tags confirmed present.",
+        "Surveyed 19/09/2026. All equipment tags confirmed present.",
         "Stack increments: 5 kg on the machines checked (leg curl, standing glute, seated calf). Cable columns and older machines not yet spot-checked.",
         "Dumbbells start at 3 kg. Step size at the light end not yet recorded.",
         "THREE cable setups: multi-station (pulley top or bottom), crossover (two side pulleys), and an adjustable column with the pulley on a vertical sled - any height. The adjustable column is the most useful single piece of equipment here given the constraints.",

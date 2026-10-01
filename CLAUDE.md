@@ -95,6 +95,9 @@ Tapping a row expands it to fullscreen:
   fat-fingered commit); older ones are final.
 - RIR ("reps left in the tank on the last set?", chips 0–4+) appears only once
   the planned sets are committed. Optional.
+- **Coaching tips** for this exercise (`coaching.exercises[id]`, see the Day
+  tab), at the top above the load, with an amber edge and "updated
+  DD/MM/YYYY": they are "for now" targets, unlike the permanent cues.
 - `cues`, `rom_notes` and `cautions`. **Some are safety-relevant**:
   `roman-chair-back-extension` carries a standing low-blood-pressure
   instruction (pause on the handles before standing). Cautions are styled to be
@@ -112,10 +115,21 @@ More tab (no planned sets) any logged exercise counts as in progress.
 **All of it is derived from the committed sets — never persist a state
 field.**
 
-**Rest timer.** Committing a set shows a count-up of elapsed rest.
+**Header clock** (`renderClock()`), in the top bar and in the detail view's
+bar: `18:42 · 2:15` = **session start** · **since last set**.
 
-> A web app only runs while its page is showing. So: store the timestamp of the
-> last done flag and compute `Date.now() - timestamp` on every repaint and on
+- Session start = the earliest set of today among **program** exercises. A
+  freeform warm-up or home curls in the morning don't start the session;
+  before the first program set the slot is empty.
+- Since last set = since the latest set of **any** exercise (he interleaves;
+  that's the rest his body had). Hidden after 60 min without a set, and when
+  the Settings rest-timer switch is off.
+- Deliberately **soft**: muted text, no colours, thresholds, flashing, sound
+  or target rest. It replaced a floating amber bubble the owner found
+  anxiety-inducing (01/10/2026) — don't bring that back.
+
+> A web app only runs while its page is showing. So: both values are derived
+> from the stored set timestamps and recomputed on every repaint and on
 > `visibilitychange`. The 1 s interval only repaints; it is never the source of
 > truth (Android suspends timers in the background, a tick counter would
 > drift). Coming back to the app shows the true elapsed time immediately.
@@ -168,10 +182,13 @@ The Day tab badge shows the number of unexported sessions.
 - **Coaching notes** (v1.5), shown at the top when present: read-only text
   from `data/coaching.json`, written by Claude in the data project as
   `C:\Progetti\Gym\coaching.json` and copied by `tools/sync_data.py` (which
-  also removes it here when it's deleted there). Format:
-  `{ "updated": "YYYY-MM-DD", "text": "plain text, \n for line breaks" }`.
-  Missing file = no section. Same origin, cached by the service worker. The
-  app never writes it. **It is public once pushed** — see Risks.
+  also removes it here when it's deleted there). Format (every key optional):
+  `{ "updated": "YYYY-MM-DD", "text": "plain text, \n for line breaks",
+  "exercises": { "<id>": [ { "text": "Try 105 kg.", "since": "YYYY-MM-DD" } ] } }`.
+  `text` shows here; `exercises` are per-exercise tips shown in the detail
+  view; `since` is for Claude's pruning and ignored. `updated` is displayed as
+  DD/MM/YYYY. Missing file = no section. Same origin, cached by the service
+  worker. The app never writes it. **It is public once pushed** — see Risks.
 
 **Export mechanics** (`exportDays()` in `app.js`):
 - A day is *pending* while it has content and its current `toDay()` output
@@ -199,7 +216,8 @@ the place for future tests and controls.
   (`swolemole.lang`, default `en`). Italiano only switches exercise names to
   their Italian gym names (see "Italian names" under Data contract).
 - **Rest timer**: On / Off (`swolemole.timer`, default `on`). Off only hides
-  the count-up; set timestamps are still recorded (the day-boundary rule uses
+  the "since last set" half of the header clock; set timestamps are still
+  recorded (they are exported as `done_at`, and the day-boundary rule uses
   them).
 - **Reset today's session**: erases today's record (exercises, sets, loads,
   exercise notes, day note, moods, export snapshot). Other days are untouched;
@@ -244,7 +262,8 @@ mechanics"), a single **day** object:
   "note": "hot, felt flat all session",
   "state": ["hot", "low-energy"],
   "exercises": [
-    { "exercise": "horizontal-leg-press", "load": 95, "sets": 3, "reps": [15, 14, 12], "rir": 1, "note": "last set was a grind" },
+    { "exercise": "horizontal-leg-press", "load": 95, "sets": 3, "reps": [15, 14, 12],
+      "done_at": [1790505510697, 1790505690121, 1790505872540], "rir": 1, "note": "last set was a grind" },
     { "freeform": "standing cable pullover, copied from the guy next to me", "load": 25, "sets": 3, "status": "trialing" }
   ]
 }
@@ -259,6 +278,12 @@ Rules:
   values in order, `null` for a set committed with an empty reps field. An
   exercise with no committed sets and no note was not performed and is
   omitted.
+- `done_at`: parallel to the sets, the `Date.now()` (ms) at which each was
+  committed — the same timestamps the header clock uses. The data project
+  derives session order and rest from them; **never store an order or a rest
+  value**. Undo removes the set and its timestamp; re-committing records a
+  fresh one. Added 01/10/2026: `upgradeSnapshot()` updates the export
+  snapshots of days shared before then, so they don't all turn pending again.
 - `freeform` (plain string) + `status: "trialing"` for a movement with no
   library id — promoted to a real entry later, by hand, in the data project.
   **This escape hatch matters**: without it he'd have to stop mid-session to

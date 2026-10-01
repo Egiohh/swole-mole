@@ -69,7 +69,7 @@ button, input, textarea { font: inherit; color: inherit; }
 #list {
   list-style: none;
   margin: 0;
-  padding: 0 12px 160px; /* room for the rest timer and the tab bar */
+  padding: 0 12px 96px; /* room for the tab bar */
 }
 
 .row {
@@ -140,7 +140,7 @@ button, input, textarea { font: inherit; color: inherit; }
 
 /* ---------- More tab ---------- */
 
-#more { padding: 0 12px 160px; }
+#more { padding: 0 12px 96px; }
 .rows { list-style: none; margin: 12px 0 0; padding: 0; }
 
 .segmented {
@@ -196,7 +196,7 @@ button, input, textarea { font: inherit; color: inherit; }
 .coach summary span { font-weight: 400; color: var(--muted); }
 .coach p { margin: 0 0 12px; white-space: pre-wrap; }
 
-#daytab { padding: 0 16px 160px; }
+#daytab { padding: 0 16px 96px; }
 #daytab .lbl:first-child { margin-top: 4px; }
 
 .moods { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
@@ -403,21 +403,16 @@ textarea {
   resize: vertical;
 }
 
-/* ---------- Rest timer ---------- */
+/* Per-exercise coaching tips: "for now", so set apart from the permanent cues. */
+.tips { margin-top: 16px; padding: 2px 12px 12px; border-radius: 12px; background: var(--surface); box-shadow: inset 5px 0 0 var(--accent); }
+.tips .lbl { margin: 10px 0 6px; color: var(--accent); }
+.tips ul { margin: 0; padding-left: 20px; }
+.tips li + li { margin-top: 6px; }
 
-#rest {
-  position: fixed;
-  left: 50%;
-  bottom: calc(72px + env(safe-area-inset-bottom)); /* clear of the tab bar */
-  transform: translateX(-50%);
-  padding: 12px 28px;
-  border-radius: 28px;
-  background: var(--accent);
-  color: var(--on-accent);
-  font-size: 22px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-  z-index: 4;
-}
+/* ---------- Header clock: session start · since last set ---------- */
+
+/* Deliberately soft: muted, small, no colour changes. */
+.clock { color: var(--muted); font-size: 15px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.bar .clock { margin-left: auto; padding-left: 8px; }
+
 [hidden] { display: none !important; }

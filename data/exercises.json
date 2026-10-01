@@ -20,15 +20,17 @@
       "cues": [
         "Only the forearms move",
         "Ribs down, back straight",
-        "Upper arm stays vertical"
+        "Upper arm stays vertical",
+        "Staggered stance - one foot forward stops the rocking"
       ],
       "common_errors": [
-        "Leaning the torso forward to add bodyweight to the movement",
+        "Leaning the torso forward to add bodyweight. Observed 27/09/2026 as rocking onto the toes while pushing down and back onto the heels on the return - that is this error, and a staggered stance removes it.",
         "Elbows drifting forward or flaring out",
         "Shrugging the shoulders at lockout"
       ],
       "rom_notes": [
-        "Upper arm stays vertical throughout; the shoulder contributes nothing."
+        "Upper arm stays vertical throughout; the shoulder contributes nothing.",
+        "A FIXED forward lean toward the column is a legitimate variant others use; it is not wrong. What disqualifies it is the torso moving during the rep - the rocking seen on 27/09/2026. Upright, as he does it, is the strict version and the better default for his back."
       ],
       "muscles": [
         {
@@ -173,14 +175,16 @@
       ],
       "cues": [
         "Shoulders stay down and back against the pad",
-        "Do not lock out hard"
+        "Do not lock out hard",
+        "Neutral wrist: handle parallel to the floor"
       ],
       "common_errors": [
         "Shoulders rolling forward at the end of the push",
         "Elbows travelling behind the torso on the return"
       ],
       "rom_notes": [
-        "Do not let the elbow pass 90 degrees on the return; the shoulder should never be forced into extension behind the trunk."
+        "Do not let the elbow pass 90 degrees on the return; the shoulder should never be forced into extension behind the trunk.",
+        "Two grip orientations are available. Use the one that keeps the wrist NEUTRAL (handle parallel to the floor) rather than rotating the wrist 90 degrees - confirmed preference 27/09/2026, and the better choice given wrist strain reported elsewhere."
       ],
       "muscles": [
         {
@@ -234,7 +238,8 @@
         "Opening so far that the shoulder is stretched at end range"
       ],
       "rom_notes": [
-        "Elbow angle stays fixed throughout; this is a fly, not a press."
+        "Elbow angle stays fixed throughout; this is a fly, not a press.",
+        "Stop the arms a little BEFORE the full stretch on the open end. Flies load the pec at its longest length, which is the most damaging part of the range; with very mobile joints he likely opens wider than most. Shortening the open end cuts the multi-day soreness reported 27/09/2026 at almost no cost to the stimulus."
       ],
       "muscles": [
         {
@@ -247,7 +252,9 @@
         }
       ],
       "cautions": [
-        "Opening too wide at the start loads the front of the shoulder capsule."
+        "Opening too wide at the start loads the front of the shoulder capsule.",
+        "PLATEAU MECHANISM: the stack moves in 5 kg steps, so 30 -> 35 kg is a ~17% jump - roughly 5 reps lost in one step. Stuck at 30 kg for months with ~6 reps at 35 kg is arithmetic, not lost strength. Bridge it with a wider rep range (12-20: stay at 30 kg until the first set reaches 20), a micro-weight on the machine if one exists, or magnetic add-on plates. Alternatively treat it as an accessory and let the chest press drive chest progression.",
+        "Pushing close to the limit costs recovery into the following sessions. Not a joint problem during the exercise (confirmed 27/09/2026, explicitly distinct from the shoulder press episode). Keep it at 1-2 RIR."
       ],
       "constraint_flags": [
         "rigid-bilateral"
@@ -273,7 +280,8 @@
       ],
       "cues": [
         "Elbow toward the jeans pocket, not out wide",
-        "Chest never leaves the pad"
+        "Chest never leaves the pad",
+        "Breathe out on the pull, in on the return - do not hold the breath"
       ],
       "common_errors": [
         "Chest lifting off the pad to add body english",
@@ -281,7 +289,8 @@
         "Flaring the elbow high, which changes the exercise"
       ],
       "rom_notes": [
-        "Low elbow path biases the lats; a deliberately high, flared elbow is a different exercise and should be a separate id."
+        "Low elbow path biases the lats; a deliberately high, flared elbow is a different exercise and should be a separate id.",
+        "Reported 01/10/2026 as 'feels like cardio', pausing around rep 10 to catch his breath. The chest pad limits rib expansion and bracing invites breath-holding. Set the seat so the pad sits on the upper sternum rather than the lower ribs, and exhale on every pull."
       ],
       "muscles": [
         {
@@ -355,7 +364,8 @@
         }
       ],
       "cautions": [
-        "Flat, fully pronated feet: check that the knees track over the feet through the whole range and do not fall inward near the bottom. See health.md, 'Feet'."
+        "Flat, fully pronated feet: check that the knees track over the feet through the whole range and do not fall inward near the bottom. See health.md, 'Feet'.",
+        "Do not turn the head to watch the stack. Reported 27/09/2026: he often looks at the column with the head tilted sideways to judge depth. That is neck rotation under load, repeated every rep. Face forward and judge depth by count or by a reference point in front instead."
       ],
       "constraint_flags": [
         "rigid-bilateral"
@@ -448,7 +458,8 @@
         }
       ],
       "cautions": [
-        "See health.md, 'Circulation'. The end-of-set pause is a standing instruction, not an optional precaution."
+        "See health.md, 'Circulation'. The end-of-set pause is a standing instruction, not an optional precaution.",
+        "UNSOLVED SETUP PROBLEM: reps are stopped by genital compression against the pad, not by the lower back (RIR 4 on 27/09 and 01/10/2026). Technogym unit. At setting 6 the pad starts at the pelvis; at 5 it is WORSE - contact moves lower, onto the genitals, and he hangs precariously. The earlier advice to lower the pad was wrong. Next things to try: setting 7 (the untested direction); compressive underwear; the horizontal back-extension bench, whose pad geometry differs. If none works, cover the posterior chain with machine-hip-thrust, standing-glute-machine and prone-opposite-arm-leg-raise instead - none of them presses on the groin."
       ],
       "constraint_flags": [],
       "requires": [
@@ -912,12 +923,13 @@
       "description": "Seated cable row. Horizontal pad, two angled foot platforms facing the user, cable emerging at seated chest height. Unsupported torso, so the trunk works isometrically throughout - a bigger movement than the lat pulldown and rated as markedly harder.",
       "execution": [
         "Sit on the pad and plant both feet on the angled platforms, knees slightly bent.",
-        "Take the handle with a neutral spine - bend at the hips with the knees bent, or scoot forward, rather than rounding over to reach it.",
+        "Take the handle WITHOUT rounding over: plant the feet, bend the knees deeply so the handle comes within reach, grip it with a neutral spine, then straighten the legs to arrive at the start position. Do not reach for it by folding the torso down between the legs.",
         "Sit up with the torso close to vertical, a slight backward lean only.",
         "Pull the handle to the lower chest, driving the elbows back past the ribs and letting the shoulder blades come together.",
         "Return under control to full arm extension without letting the torso get pulled forward into flexion."
       ],
       "cues": [
+        "Fetch the handle with bent knees, not with a bent back",
         "Chest tall, lean back only slightly",
         "Drive the elbows back, squeeze the shoulder blades",
         "Do not let the cable pull you into a round back on the return"
@@ -925,7 +937,7 @@
       "common_errors": [
         "Rocking the torso back and forth, which turns a back exercise into a lumbar one",
         "Rounding forward on the return under load",
-        "Reaching for the handle from a rounded-over position at the start"
+        "Overreaching for the handle by bending the torso down between the legs - observed 27/09/2026. This is the single most lumbar-loading instant in the whole routine."
       ],
       "rom_notes": [
         "Torso stays within roughly 10-15 degrees of vertical throughout. The range comes from the arms and shoulder blades, not from the spine."
@@ -1150,7 +1162,7 @@
         "femorali"
       ],
       "load_type": "stack-kg",
-      "description": "Seated machine knee flexion. CONFIRMED on site 2026-09-19: exists, seated type, 5 kg stack increments. The only dedicated hamstring exercise available.",
+      "description": "Seated machine knee flexion. CONFIRMED on site 19/09/2026: exists, seated type, 5 kg stack increments. The only dedicated hamstring exercise available.",
       "execution": [
         "Set the back pad so the knee joint lines up with the machine's pivot.",
         "Place the roller against the back of the lower calf, above the Achilles.",
@@ -1197,7 +1209,7 @@
         "sitting calf"
       ],
       "load_type": "stack-kg",
-      "description": "Seated calf raise - straddled seat with a pad across the thighs. CONFIRMED on site 2026-09-19. The bent knee shortens the gastrocnemius, which shifts the work onto the SOLEUS - the one calf muscle a leg-press calf raise does not reach.",
+      "description": "Seated calf raise - straddled seat with a pad across the thighs. CONFIRMED on site 19/09/2026. The bent knee shortens the gastrocnemius, which shifts the work onto the SOLEUS - the one calf muscle a leg-press calf raise does not reach.",
       "execution": [
         "Sit with the balls of the feet on the platform and the pad across the lower thighs.",
         "Let the heels drop for a full stretch.",
@@ -1239,7 +1251,7 @@
         "abduttori"
       ],
       "load_type": "stack-kg",
-      "description": "Seated hip abduction - pads outside the knees, legs driven apart. CONFIRMED on site 2026-09-19 (the 'no' half of the yes/no pair). The only direct gluteus medius work available.",
+      "description": "Seated hip abduction - pads outside the knees, legs driven apart. CONFIRMED on site 19/09/2026 (the 'no' half of the yes/no pair). The only direct gluteus medius work available.",
       "execution": [
         "Sit with the pads against the outside of the knees.",
         "Drive the knees apart through the available range.",
@@ -1282,7 +1294,7 @@
         "glutei in piedi"
       ],
       "load_type": "stack-kg",
-      "description": "Standing single-leg hip extension against a pad. CONFIRMED on site 2026-09-19, never used. Unilateral by construction, which suits the asymmetry constraints well.",
+      "description": "Standing single-leg hip extension against a pad. CONFIRMED on site 19/09/2026, never used. Unilateral by construction, which suits the asymmetry constraints well.",
       "execution": [
         "Stand facing the frame, holding the handles, torso upright.",
         "Place one leg against the pad.",
@@ -1328,7 +1340,7 @@
         "spinte in alto"
       ],
       "load_type": "stack-kg",
-      "description": "Machine hip thrust. CONFIRMED on site 2026-09-19: feet planted on a platform with knees at roughly 90 degrees, upper back flat on the cushion, pelvis driven up against a rolling pad. Supine and supported, no spinal compression, nothing overhead - fits the constraints in health.md unusually well.",
+      "description": "Machine hip thrust. CONFIRMED on site 19/09/2026: feet planted on a platform with knees at roughly 90 degrees, upper back flat on the cushion, pelvis driven up against a rolling pad. Supine and supported, no spinal compression, nothing overhead - fits the constraints in health.md unusually well.",
       "execution": [
         "Sit with the upper back against the cushion and the roller pad across the hips.",
         "Plant the feet on the platform, knees at about 90 degrees at the top.",
